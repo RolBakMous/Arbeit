@@ -1,0 +1,63 @@
+SELECT
+ROW_NUMBER() OVER(ORDER BY Assessment_Name ASC) AS 'Row#',
+Mutterkonzern,
+Subsidiary_Name,
+Assessment_Name,
+Business,
+NumberOfEmployees,
+Sales,
+Overall_Score,
+Score,
+category
+FROM (
+SELECT
+'VW' AS "Mutterkonzern",
+CASE A.Subsidiary_Name
+WHEN 0 THEN 'Pre-Assessment CC'
+WHEN 1 THEN 'Monitor Report'
+WHEN 2 THEN 'Volkswagen, zentral (CC) (Wolfsburg*)'
+WHEN 3 THEN 'TRATON (München*)'
+WHEN 4 THEN 'MAN (München*)'
+WHEN 5 THEN 'Scania (Södertälje*)'
+WHEN 6 THEN 'Audi (Ingolstadt*, Puebla*)'
+WHEN 7 THEN 'Porsche Holding Salzburg/ Porsche Bank AG (Salzburg*, Berlin*)'
+WHEN 8 THEN 'Porsche AG (Stuttgart*)/ Porsche FS GmbH (Bietigheim – Bissingen*)'
+WHEN 9 THEN 'SEAT (Martorell*)'
+WHEN 10 THEN 'Skoda (Mladá Boleslav*)'
+WHEN 11 THEN 'VW Group China (Beijing*)'
+WHEN 12 THEN 'Volkswagen, VW PKW (Wolfsburg*, Puebla*, Kaluga*, Uitenhagen*)'
+WHEN 13 THEN 'Reporting Brands'
+WHEN 14 THEN 'Pre-Assessment Financial Services'
+WHEN 15 THEN 'Volkswagen Finance (China) Co. (Peking*)'
+WHEN 16 THEN 'Volkswagen Bank, S.A., Institución de Banca Múltiple (Puebla*)'
+WHEN 17 THEN 'VW Credit, Inc. (Herndon*)'
+WHEN 18 THEN 'VW Financial Services AG (Brunswick*)'
+WHEN 19 THEN 'Pre-Assessment Bank'
+WHEN 20 THEN 'VW Bank GmbH (Brunswick*)'
+WHEN 21 THEN 'Volkswagen Bank GmbH, Branch Spain (Madrid*)'
+WHEN 22 THEN 'VOLKSWAGEN BANK POLSKA S.A. (Warsaw*)'
+WHEN 23 THEN 'Group Reporting (VW AG)'
+END AS 'Subsidiary_Name',
+B.Assessment_Name,
+A.Business,
+A.NumberOfEmployees,
+A.Sales,
+B.Overall_Score,
+B.Score_Orga,
+B.Score_Budget,
+B.Score_Planung,
+B.Score_Vorbereitung,
+B.Score_Pruefung,
+B.Score_Berichterst,
+B.Score_Pruefnacharb,
+B.Score_Followup,
+B.Score_Auswahl,
+B.Score_Entwicklung,
+B.Score_Fuehrung
+FROM  sph_Object_AS_SubsidiaryAssessment AS A
+LEFT JOIN sph_Object_AS_Assessment_Aggregation AS B ON B.Assessment_UUID = A.UUID
+) as X
+UNPIVOT
+(
+  Score
+  FOR [category] IN (Score_Orga, Score_Budget, Score_Planung, Score_Vorbereitung, Score_Pruefung, Score_Berichterst, Score_Pruefnacharb, Score_Followup, Score_Auswahl, Score_Entwicklung, Score_Fuehrung) ) AS p
