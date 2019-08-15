@@ -1,0 +1,15 @@
+-Declare the cursors that will loop through the objects
+	  DECLARE get_UUID CURSOR FOR (SELECT [UUID] FROM [sph_Object_ISC9KVG_AM])
+
+	  --Loop over UUID
+	  OPEN get_UUID;
+	  FETCH NEXT FROM get_UUID INTO @KVG_AM_UUID;
+	  WHILE @@FETCH_STATUS = 0
+	  BEGIN
+
+FETCH NEXT FROM get_UUID INTO @KVG_AM_UUID;
+		END
+
+	CLOSE get_UUID;
+	-- Deallocate the declared cursors
+ 	DEALLOCATE get_UUID

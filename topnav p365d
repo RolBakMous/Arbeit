@@ -1,0 +1,265 @@
+<style>
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .btn.btn-primary.buttonElement.form_builder_float_left{
+    background-color: #00338D !important;
+  }
+
+  .separater {
+    overflow: hidden;
+    background-color: #00338D;
+  }
+
+  .separater a {
+    float: left;
+    color: #ffffff;
+    text-align: center;
+    padding: 5px 8px;
+    text-decoration: none;
+    font-size: 15px;
+  }
+
+  .separater a:hover {
+    background-color: #005EB8;
+    color: white;
+  }
+
+  .separater a.active {
+    background-color: #00A3A1;
+    color: white;
+  }
+
+  .separater a.inactive {
+    background-color: #00A3A1;
+    color: white;
+    cursor: not-allowed;
+  }
+
+  .separater a.inactive:hover {
+    background-color: #005EB8;
+    color: white;
+  }
+
+</style>
+
+<div class="topnavnew">
+
+<a  class="active"
+   style="text-decoration:none;border-right: 1px solid #00338D"
+   href=""
+   title="Edit"
+   id="edit_button"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+
+  <i class="fa fa-edit" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+<a  class="inactive"
+   style="text-decoration:none;border-right: 1px solid #00338D; "
+   title="Edit"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' " >
+
+  <i class="fas fa-edit" style="font-size: 12pt; color: white; margin-left:4px; width:1.2rem;"></i>
+</a>
+
+<a  class="active"
+   style="text-decoration:none;border-right: 1px solid #00338D"
+   href=""
+   title="View"
+   id="view_button"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+
+  <i class="fa fa-save" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+<a  class="inactive"
+   style="text-decoration:none;border-right: 1px solid #00338D"
+   href=""
+   title="View"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' " >
+
+  <i class="fa fa-save" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+
+<a  class="active"
+   style="text-decoration:none;border-right: 1px solid #00338D"
+   title="Progress"
+   id="test"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+
+  <i class="fas fa-bullseye" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+<a  class="inactive"
+   style="text-decoration:none;border-right: 1px solid #00338D; "
+   title="Progress"
+   id="disabled_test" ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' " >
+
+  <i class="fas fa-bullseye" style="font-size: 12pt; color: white; margin-left:4px; width:1.2rem;"></i>
+</a>
+
+
+<a  class="active"
+   style="float:left;text-decoration:none;border-right: 1px solid #00338D; display: none"
+   href=""
+   id="save_button"
+   title= "Save">
+
+  <i class="fas fa-save" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+
+<a  class="active"
+   style="float:left;text-decoration:none;border-right: 1px solid #00338D"
+   href="" title="Discussion"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' " >
+
+  <i class="fas fa-comment" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+<a  class="inactive"
+   style="float:left;text-decoration:none;border-right: 1px solid #00338D"
+   href=""
+   title="Discussion"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' ">
+
+  <i class="fas fa-comment" style="font-size: 12pt; color: white; margin-left:4px; width:1.2rem;"></i>
+</a>
+
+
+<a  class="active"
+   style="float:left; text-decoration:none;border-right: 1px solid #00338D;"
+   id="idea_button"
+   title= "Idea"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+
+  <i class="fas fa-lightbulb" style="font-size: 12pt; color: white; margin-left:4px; width:1.2rem;"></i>
+</a>
+
+<a  class="inactive"
+   style="float:left; text-decoration:none;border-right: 1px solid #00338D;"
+   id="disabled_idea_button"
+   title= "Idea"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == ''">
+
+  <i class="fas fa-lightbulb" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+</a>
+
+
+<a  class="active"
+   style="float:left; text-decoration:none;border-right: 1px solid #00338D;"
+   id="stakeholders_button"
+   title= "Stakeholder selection"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' "
+   ng-controller="WizModal"
+   ng-click = "onButtonClick('[[StrategyUUID]]')">
+
+  <i class="fas fa-users-cog" style="font-size: 12pt; color: white; margin-left:4px;width:1.2rem;"></i>
+  <div id="form-wizard-modal"></div>
+</a>
+
+
+<a  class="inactive"
+   style="float:left; text-decoration:none;border-right: 1px solid #00338D;"
+   id="disabled_stakeholders_button"
+   title= "Stakeholder selection"
+   ng-if = " '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' " >
+
+  <i class="fas fa-users-cog" style="font-size: 12pt; color: white; margin-left:4px;width:1.2rem;"></i>
+</a>
+
+
+  <a  class="active"
+     style="float:right;text-decoration:none;border-right: 1px solid #00338D"
+     href="/#/PRD9/CM/StrategyAnalysis/[[StrategyUUID]]/Implement/implementPhase"
+     title="Back to cockpit">
+
+    <i class="fas fa-angle-double-left" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>
+  </a>
+  <a style="float:right;border-right: 1px solid #00338D; font-size: 12pt; color: white;">Progress: [[ProgressStatus]]%
+  </a>
+</div>
+
+
+<script>
+  $( document ).ready(function() {
+    $( "#R_8").hide();
+    $( "#R_13").hide();
+    $( "#save_button" ).hide();
+    $( "#view_button" ).hide();
+    $( "#test" ).show();
+    $( '#R_26D_27C_3 .col-12 #submitSecondary').click(); // Default field state - Disabled
+
+    $( ".topnavnew").on("click", "#test", function(){
+      $( "#R_8").fadeIn(800);
+      $( "#save_button" ).show();
+      $( "#test" ).hide();
+    });
+
+    $( "#save_button" ).click(function() {
+      $( "#R_8").fadeOut(800);
+      $( "#save_button" ).hide();
+      $( "#test" ).show();
+      $( '#R_26D_27C_10 .col-12 #submitSecondary').click();
+    });
+
+    $( ".topnavnew").on("click", "#idea_button", function(){
+
+      if($( "#R_13" ).is(":visible") == false){
+
+        var styles = {
+            display: "block",
+            position: 'absolute',
+            top: '100px',
+            right: '-1900px',
+            height: '80vh',
+            overflow: 'auto',
+            'z-index': '22',
+            'box-shadow': 'none'
+        };
+
+        $( "#R_13" ).css(styles);
+        $( "#R_13" ).animate({ "right": "-0px" }, "slow" );
+        $( "#idea_button" ).attr("disabled", false);
+
+        $( "#idea_button" ).html('<i class="far fa-times-circle" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>');
+
+      }else{
+
+        $( "#R_13" ).animate({ "right": "-1900px" }, "slow" );
+        $( "#R_13" ).fadeOut(800);
+        $( "#idea_button" ).attr("disabled", false);
+
+        $( "#idea_button" ).html('<i class="fas fa-lightbulb" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>');
+      }
+    });
+  });
+
+
+      $( ".active").on("click", "#edit_button", function(){
+        $( "#edit_button" ).hide();
+        $( "#view_button" ).show();
+        $( '#R_26D_27C_3 .col-12 #submitSecondary').click();
+      });
+      $( ".active").on("click", "#view_button", function(){
+        $( "#view_button" ).hide();
+        $( "#edit_button" ).show();
+        $( '#R_26D_27C_3 .col-12 #submitSecondary').click();
+      });
+
+  var controllerName = "WizModal";
+  ControllerProvider(controllerName, function ($scope,$compile) {
+    $scope.onButtonClick = function(rUUID){
+
+      $scope.recordUUID = rUUID;
+      $scope.wizardUUID = '5D4BDC56-DAB2-4085-BCBD-BAB3BD478EC1';
+
+      $('#form-wizard-modal').append($compile('<form-wizard-modal wizard-uuid= "' + $scope.wizardUUID +  '" record-uuid = "' + $scope.recordUUID +  '" mode="edit"></form-wizard-modal>')($scope))
+    }
+  });
+</script>

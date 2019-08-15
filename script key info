@@ -1,0 +1,70 @@
+<html>
+
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  </head>
+  <div class="seperater" style="height: 60px; padding-top:20px; padding-bottom: 1px; color: #D3D3D3; font-size: 22px; border-bottom: solid #D3D3D3; border-width: 4px;"><strong>a) Key Info :</strong>
+    <a class="active"
+       style="float:right;text-decoration:none;border-right: 0px solid #D3D3D3;"
+       href=""
+       id="save_levers"
+       title="Save">
+      <i class="fas fa-save" style="font-size: 15pt; color: #D3D3D3; margin-left:4px; width:1.2rem;"></i>
+    </a>
+    <a class="active"
+       style="float:right;text-decoration:none;border-right: 0px solid #D3D3D3;"
+       href=""
+       id="edit_master"
+       title="Edit and Save">
+      <i class="fas fa-pencil" style="font-size: 15pt; color: #D3D3D3; margin-left:4px; width:1.2rem;"></i>
+    </a>
+      </div>
+
+
+
+    <!--#868e96;
+
+  <div class="topnavnew">
+    <a class="passive" >Sourcing Levers</a>
+    <div class="topnavnew-right">
+      <a class="passive-nocolor">Progress: [[progress_status]]%</a>
+      <a class="active"
+         href=""
+         id="edit_master"
+         title="Edit and Save">
+        <i class="fas fa-pencil"></i>
+      </a>
+      <a class="active"
+         href=""
+         id="save_levers"
+         title="Save">
+        <i class="fas fa-save"></i>
+      </a>
+    </div>
+  </div>
+-->
+    <script>
+
+      $( document ).ready(function() {
+        $( "#save_levers" ).hide();
+        $( "#edit_master" ).show();
+
+        $( "#edit_master").on("click", //"#test",
+                              function(){
+          $( "#save_levers" ).show();
+          $( "#edit_master" ).hide();
+        });
+
+        $( "#save_levers" ).click(function() {
+          $( "#edit_master" ).show();
+          $( "#save_levers" ).hide();
+          $( '#R_16D_17C_6 .col-12 #submitSecondary').click();
+
+        });
+
+      });
+
+    </script>
+
+    </html>
