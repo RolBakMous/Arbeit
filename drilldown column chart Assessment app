@@ -200,11 +200,10 @@ var bool2 = 0;
                     SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany);
                     bool2 = 1;
 
-                  //  if (bool1 == 1 && bool2 == 1) {
-                  //      GenerateFinal();
-                  //alert(JSON.stringify(dataRowSubsidiary));
-                    }
-
+                        if(bool1 == 1 && bool2 == 1){
+                          Calc_AVG();
+                        }
+                  }
                   },{
                         uiUUID: ObjectTemplateUUID2,
                         filter: {
@@ -258,7 +257,7 @@ function SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsC
 
 function Calc_AVG() {
 
-  //alert("berechne durchschnitt von assesScore_Overall");
+  alert("berechne durchschnitt von assesScore_Overall");
       //average per category, rount for 2 decimals
       /* let sum_so = scoring_general.reduce((previous, current) => current += previous);
       let avg_so = sum_so / scoring_general.length;
