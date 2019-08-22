@@ -26,7 +26,7 @@
     var subsidiary = ["Pre-Assessment CC", "Monitor Report", "Volkswagen, zentral (CC) (Wolfsburg*)", "TRATON (München*)", "MAN (München*)", "Scania (Södertälje*)", "Audi (Ingolstadt*, Puebla*)", "Porsche Holding Salzburg/ Porsche Bank AG (Salzburg*, Berlin*)", "Porsche AG (Stuttgart*)/ Porsche FS GmbH (Bietigheim – Bissingen*)", "SEAT (Martorell*)", "Skoda (Mladá Boleslav*)", "VW Group China (Beijing*)", "Volkswagen, VW PKW (Wolfsburg*, Puebla*, Kaluga*, Uitenhagen*)", "Reporting Brands", "Pre-Assessment Financial Services", "Volkswagen Finance (China) Co. (Peking*)", "Volkswagen Bank, S.A., Institución de Banca Múltiple (Puebla*)", "VW Credit, Inc. (Herndon*)", "VW Financial Services AG (Brunswick*)", "Pre-Assessment Bank", "VW Bank GmbH (Brunswick*)", "Volkswagen Bank GmbH, Branch Spain (Madrid*)", "VOLKSWAGEN BANK POLSKA S.A. (Warsaw*)", "Group Reporting (VW AG)"];
     var jahr = [];
     var section = [];
-    var assesScore_Overall = 0.00;
+    var dataRowAll = [];
 
     // Average
     var AVERAGE = [];
@@ -230,21 +230,22 @@
       // SuperCombi2 function to concate each fetchedvalue into one data row for Subsisdiary Assessment object
     function SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany) {
         for (var r = 0; r < subsUUID.length; r++){
-          var row = 'UUID:'.concat(subsUUID[r],";subsName:", subsName[r],";Sales:", subsSales[r],";NumberOfEmployees:", subsNOE[r],";Business:", subsBusiness[r],";Company:", subsCompany[r]);
+          var row = 'ASUUID:'.concat(subsUUID[r],";subsName:", subsName[r],";Sales:", subsSales[r],";NumberOfEmployees:", subsNOE[r],";Business:", subsBusiness[r],";Company:", subsCompany[r]);
           dataRowSubsidiary.push(row);
          }
       };
 
     function GenerateFinal() {
-        // alert(dataRowAggregation[0]);
-        // alert(dataRowSubsidiary[0]);
-        // for (var a = 0; a < dataRowSubsidiary.length; a++) {
-        //     for (var b = 0; b < dataRowAggregation.length; b++){
-        //         if(dataRowSubsidiary[a].equals(dataRowAggregation[b])){
-        //             dataRowAll.push(dataRowSubsidiary[a].concat(dataRowAggregation[b]));
-        //         }
-        //     };
-        // };
+         //alert(JSON.stringify(dataRowAggregation));
+         //alert(JSON.stringify(dataRowSubsidiary));
+         for (var a = 0; a < dataRowSubsidiary.length; a++) {
+             for (var b = 0; b < dataRowAggregation.length; b++){
+                 if(dataRowSubsidiary[a]["UUID"] == dataRowAggregation[b]["ASUUID"]){
+                   dataRowAll.push(dataRowSubsidiary[a].concat(dataRowAggregation[b]));
+                 }
+             };
+         };
+         //alert(JSON.stringify(dataRowAll));
         GenerateChart();
     };
 
@@ -282,17 +283,16 @@
     //alert(dataJson);
     var dataArray = [];
 
+    //alert(dataRowAll[0][1]);
     for(var a = 0; a < subsidiary.length; a++){
 
         var roland = '{"name":"'+subsidiary[a]+'", "y": 0.1, "drilldown": "'+subsidiary[a]+'"}';
         dataArray.push(roland);
     };
-    var dataDrilldown = '[{"name": "average score", "id": "VW","type":"column","color":"#051141", "data":['+ dataArray +']}]';
+    var dataDrilldown = '[{"name": "average score", "id": "VW","type":"column","color":"#051141", "data":['+ dataArray +']}, {"id":"Pre-Assessment CC", "data":[["test", 1], ["test", 2]]}]';
     // Parse the variable to JSON format
     var data1 = JSON.parse(dataJson);
     var drilldown = JSON.parse(dataDrilldown);
-
-
 
     // Create the chart
     Highcharts.chart('DrilldownColumn', {
