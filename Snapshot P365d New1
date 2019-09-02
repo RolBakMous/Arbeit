@@ -1,0 +1,1299 @@
+ALTER PROCEDURE [dbo].[PRD9SaveStrategy]
+  @strategy_uuid NVARCHAR(200)
+  /*----------------------Action Log----------------------
+CreatedAt: 28.02.19
+Reason: Save a copy Strategy Version
+UpdatedAt: 06.03.19
+Reason: Added finished analysis tables (Porter's 5 Forces and Kraljic) in the snapshot
+UpdateAt: 13.03..19
+Reason: Added PESTLE (main and details), BusinessPartner Needs and PRD9EvaluationOfSuppliersQuestionnaire objects in the snapshot
+--------------------------------------------------------*/
+AS
+  BEGIN
+    DECLARE @category_uuid NVARCHAR(200)
+    SET @category_uuid = ( SELECT category_uuid FROM [sph_Object_PRD9Strategy] WHERE [UUID] = @strategy_uuid)
+    DECLARE @version INT
+    SET @version =
+    (
+           SELECT Max([Version]) + 1 AS version
+           FROM   [sph_Object_PRD9Strategy]
+           WHERE  [category_uuid] = @category_uuid)
+    INSERT INTO sph_object_prd9strategy
+                (
+                            [CreatedAt] ,
+                            [CreatedBy] ,
+                            [name] ,
+                            [version] ,
+                            [claimed] ,
+                            [category_uuid] ,
+                            [active] -- Active / Inactive
+                            ,
+                            [private] ,
+                            [team] ,
+                            [manual_save] -- Toggle man / auto yes / no
+                )
+    SELECT Getdate() --[CreatedAt]
+           ,
+           a.[claimed] --[CreatedBy]
+           ,
+           a.[name] ,
+           @version --latest version
+           ,
+           a.[claimed] ,
+           a.[category_uuid] ,
+           'Active' --[active]
+           ,
+           a.[private] ,
+           a.[team] ,
+           'Yes'
+    FROM   [sph_Object_PRD9Strategy] a
+    WHERE  a.[UUID] = @strategy_uuid --'AD4F8AC0-0B53-4463-A9CA-2A2AF6FCF0BE'
+           ;
+
+    UPDATE [sph_Object_PRD9Strategy]
+    SET    [Active] = 'Inactive'
+    WHERE  [UUID] = @strategy_uuid;
+
+    -- At this point, we saved the new strategy, get the UUID of it to be used to create snapshots of the analysis tables
+    DECLARE @new_strategy_uuid NVARCHAR (200)
+    SET @new_strategy_uuid =
+    (
+             SELECT TOP 1
+                      [UUID]
+             FROM     [sph_Object_PRD9Strategy]
+             WHERE    [category_uuid] = @category_uuid
+             ORDER BY [version] DESC);
+    UPDATE [sph_Object_PRD9Strategy]
+    SET    [Active] = 'Inactive'
+    WHERE  [UUID] <> @new_strategy_uuid
+    AND    [category_uuid] = @category_uuid
+    AND    [Active] = 'Active'
+    -- Taking Snapshot Phase by Phase, App by App:
+    --ANALYSZE PHASE
+    -- Snapshot category Overview (PRD9CategoryOverview)
+    INSERT INTO [sph_Object_PRD9CategoryOverview]
+                (
+                            [CreatedBy] ,
+                            [CreatedAt] ,
+                            [StrategyUUID] ,
+                            [StrategyDescription] ,
+                            [KeySupplierMarkets] ,
+                            [TypicalProductsServices] ,
+                            [ProgressStatus] ,
+                            [Idea_title] ,
+                            [Idea_desc] ,
+                            [Idea_saving] ,
+                            [Attachment] ,
+                            [Short_comment] ,
+                            [Long_comment]
+                )
+    SELECT [CreatedBy] ,
+           Getdate() ,
+           @new_strategy_uuid ,
+           [StrategyDescription] ,
+           [KeySupplierMarkets] ,
+           [TypicalProductsServices] ,
+           [ProgressStatus] ,
+           [Idea_title] ,
+           [Idea_desc] ,
+           [Idea_saving] ,
+           [Attachment] ,
+           [Short_comment] ,
+           [Long_comment]
+    FROM   [sph_Object_PRD9CategoryOverview]
+    WHERE  [StrategyUUID]= @strategy_uuid
+    -- Snapshot Spend Analysis (PRD9SpendAnalysis)
+    INSERT INTO [sph_Object_PRD9SpendAnalysis]
+                (
+                            [CreatedBy] ,
+                            [CreatedAt] ,
+                            [StrategyUUID] ,
+                            [ProgressBar] ,
+                            [ExtToolURL]
+                )
+    SELECT [CreatedBy] ,
+           Getdate() ,
+           @new_strategy_uuid ,
+           [ProgressBar] ,
+           [ExtToolURL]
+    FROM   [sph_Object_PRD9SpendAnalysis]
+    WHERE  [StrategyUUID]= @strategy_uuid
+    -- Snapshot PRD9BusinessPartnerNeeds
+    INSERT INTO [sph_Object_PRD9BusinessPartnerNeeds]
+                (
+                            [CreatedBy] ,
+                            [CreatedAt] ,
+                            [strategy_uuid] ,
+                            [business_partner] ,
+                            [due_date] ,
+                            [survey_template] ,
+                            [survey_name] ,
+                            [assigned_user] ,
+                            [status] ,
+                            [bpn_uuid] ,
+                            [users] ,
+                            [idea_saving] ,
+                            [idea_desc] ,
+                            [idea_title] ,
+                            [attachment] ,
+                            [long_comment] ,
+                            [short_comment]
+                )
+    SELECT [CreatedBy] ,
+           Getdate() ,
+           @new_strategy_uuid ,
+           [business_partner] ,
+           [due_date] ,
+           [survey_template] ,
+           [survey_name] ,
+           [assigned_user] ,
+           [status] ,
+           [bpn_uuid] ,
+           [users] ,
+           [idea_saving] ,
+           [idea_desc] ,
+           [idea_title] ,
+           [attachment] ,
+           [long_comment] ,
+           [short_comment]
+    FROM   [sph_Object_PRD9BusinessPartnerNeeds]
+    WHERE  [strategy_uuid] = @strategy_uuid
+    -- Snapshot Stakeholder Mapping
+    INSERT INTO [sph_Object_PRD9StakeholderMapping]
+                (
+                            [CreatedBy] ,
+                            [CreatedAt] ,
+                            [strategy_uuid] ,
+                            [idea_savings] ,
+                            [idea_desc] ,
+                            [idea_name] ,
+                            [progress] ,
+                            [attachment] ,
+                            [long_comment] ,
+                            [short_comment]
+                          )
+                select [CreatedBy] ,
+                       getdate() ,
+                       @new_strategy_uuid ,
+                       [idea_savings] ,
+                       [idea_desc] ,
+                       [idea_name] ,
+                       [progress] ,
+                       [attachment] ,
+                       [long_comment] ,
+                       [short_comment]
+                FROM   [sph_Object_PRD9StakeholderMapping]
+                WHERE  [strategy_uuid]= @strategy_uuid
+                -- Snapshot Stakeholder Mapping Entries
+                INSERT INTO [sph_Object_PRD9StakeholderMappingEntries]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [strategy_uuid] ,
+                                        [stakeholder_name] ,
+                                        [personal_notes] ,
+                                        [communication_method] ,
+                                        [level_of_interest] ,
+                                        [influence] ,
+                                        [importance] ,
+                                        [entry_uuid]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [stakeholder_name] ,
+                       [personal_notes] ,
+                       [communication_method] ,
+                       [level_of_interest] ,
+                       [influence] ,
+                       [importance] ,
+                       [entry_uuid]
+                FROM   [sph_Object_PRD9StakeholderMappingEntries]
+                WHERE  [strategy_uuid] = @strategy_uuid
+                -- Snapshot SWOT Analysis
+                INSERT INTO [sph_Object_PRD9SWOTAnalysis]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [ProgressStatus] ,
+                                        [Idea_title] ,
+                                        [Idea_desc] ,
+                                        [Idea_saving] ,
+                                        [Attachment] ,
+                                        [Short_comment] ,
+                                        [Long_comment] ,
+                                        [Strength] ,
+                                        [Weaknesses] ,
+                                        [Opportunities] ,
+                                        [Threats]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [ProgressStatus] ,
+                       [Idea_title] ,
+                       [Idea_desc] ,
+                       [Idea_saving] ,
+                       [Attachment] ,
+                       [Short_comment] ,
+                       [Long_comment] ,
+                       [Strength] ,
+                       [Weaknesses] ,
+                       [Opportunities] ,
+                       [Threats]
+                FROM   [sph_Object_PRD9SWOTAnalysis]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot SWOT Analysis Entries
+                INSERT INTO [sph_Object_PRD9SWOTAnalysisEntry]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [SWOT] ,
+                                        [Entry] ,
+                                        [PESTLE] ,
+                                        [PORTERS5] ,
+                                        [StrategyUUID_original] ,
+                                        [add_porters5] ,
+                                        [add_pestle] ,
+                                        [deletion_flag]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [SWOT] ,
+                       [Entry] ,
+                       [PESTLE] ,
+                       [PORTERS5] ,
+                       [StrategyUUID_original] ,
+                       [add_porters5] ,
+                       [add_pestle] ,
+                       [deletion_flag]
+                FROM   [sph_Object_PRD9SWOTAnalysisEntry]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot Review & Approval
+                INSERT INTO [sph_Object_PRD9ReviewApproval]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [ProgressStatus] ,
+                                        [Idea_title] ,
+                                        [Idea_desc] ,
+                                        [Idea_saving] ,
+                                        [Attachment] ,
+                                        [Short_comment] ,
+                                        [Long_comment]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [ProgressStatus] ,
+                       [Idea_title] ,
+                       [Idea_desc] ,
+                       [Idea_saving] ,
+                       [Attachment] ,
+                       [Short_comment] ,
+                       [Long_comment]
+                FROM   [sph_Object_PRD9ReviewApproval]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot Contract Analysis
+                INSERT INTO [sph_Object_PRD9ContractAnalysis]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [ProgressStatus] ,
+                                        [Idea_title] ,
+                                        [Idea_desc] ,
+                                        [Idea_saving] ,
+                                        [Attachment] ,
+                                        [Short_comment] ,
+                                        [Long_comment] ,
+                                        [ExToolURL]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [ProgressStatus] ,
+                       [Idea_title] ,
+                       [Idea_desc] ,
+                       [Idea_saving] ,
+                       [Attachment] ,
+                       [Short_comment] ,
+                       [Long_comment] ,
+                       [ExToolURL]
+                FROM   [sph_Object_PRD9ContractAnalysis]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot Contract Analysis Entries
+                INSERT INTO [sph_Object_PRD9ContractAnalysisEntries]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [Business Unit] ,
+                                        [Action] ,
+                                        [Supplier ID] ,
+                                        [Supplier Location] ,
+                                        [Comments] ,
+                                        [Attachments] ,
+                                        [Notification Setting],
+                                        [Supplier Name],
+                                        [Supplier Performance],
+                                        [Contract Title] ,
+                                        [Description],
+                                        [Scope of contract],
+                                        [Start Date],
+                                        [Expiration Date],
+                                        [Total Contract Value],
+                                        [Percentage of Category Spend],
+                                        [Annual Contract Value],
+                                        [Contract Owner]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [Business Unit] ,
+                       [Action] ,
+                       [Supplier ID] ,
+                       [Supplier Location] ,
+                       [Comments] ,
+                       [Attachments] ,
+                       [Notification Setting],
+                       [Supplier Name],
+                       [Supplier Performance],
+                       [Contract Title],
+                       [Description],
+                       [Scope of contract] ,
+                       [Start Date] ,
+                       [Expiration Date],
+                       [Total Contract Value] ,
+                       [Percentage of Category Spend],
+                       [Annual Contract Value],
+                       [Contract Owner]
+                FROM   [sph_Object_PRD9ContractAnalysisEntries]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot Category Intelligence
+                INSERT INTO [sph_Object_PRD9CategoryIntelligence]
+                            (
+                                        [CreatedBy] ,
+                                        [CreatedAt] ,
+                                        [StrategyUUID] ,
+                                        [ProgressStatus] ,
+                                        [Idea_title] ,
+                                        [Idea_desc] ,
+                                        [Idea_saving] ,
+                                        [Attachement] ,
+                                        [Short_comment] ,
+                                        [Long_comment]
+                            )
+                SELECT [CreatedBy] ,
+                       Getdate() ,
+                       @new_strategy_uuid ,
+                       [ProgressStatus] ,
+                       [Idea_title] ,
+                       [Idea_desc] ,
+                       [Idea_saving] ,
+                       [Attachement] ,
+                       [Short_comment] ,
+                       [Long_comment]
+                FROM   [sph_Object_PRD9CategoryIntelligence]
+                WHERE  [StrategyUUID]= @strategy_uuid
+                -- Snapshot PESTLE Analysis
+                INSERT INTO [sph_Object_PRD9Pestle]
+                            (
+                                        [CreatedAt] ,
+                                        [CreatedBy] ,
+                                        [ProgressStatus] ,
+                                        [StrategyUUID] ,
+                                        [idea_saving] ,
+                                        [idea_desc] ,
+                                        [idea_title] ,
+                                        [Email] ,
+                                        [Attachment] ,
+                                        [Long_comment] ,
+                                        [Short_comment] ,
+                                        [Political] ,
+                                        [Economic] ,
+                                        [Social] ,
+                                        [Technological] ,
+                                        [Legal] ,
+                                        [Environmental]
+                            )
+                SELECT Getdate() ,
+                       [CreatedBy] ,
+                       [ProgressStatus] ,
+                       @new_strategy_uuid ,
+                       [idea_saving] ,
+                       [idea_desc] ,
+                       [idea_title] ,
+                       [Email] ,
+                       [Attachment] ,
+                       [Long_comment] ,
+                       [Short_comment] ,
+                       [Political] ,
+                       [Economic] ,
+                       [Social] ,
+                       [Technological] ,
+                       [Legal] ,
+                       [Environmental]
+
+         FROM   [sph_Object_PRD9Pestle]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot Pestle Analysis Entries Table
+         INSERT INTO [sph_Object_PRD9PestleEntries]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [StrategyUUID] ,
+                                 [SWOT] ,
+                                 [Entry] ,
+                                 [PESTLE] ,
+                                 [Proters5] ,
+                                 [StrategyUUID_original] ,
+                                 [add_porters5] ,
+                                 [add_swot] ,
+                                 [deletion_flag]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [SWOT] ,
+                [Entry] ,
+                [PESTLE] ,
+                [Proters5] ,
+                [StrategyUUID_original] ,
+                [add_porters5] ,
+                [add_swot] ,
+                [deletion_flag]
+         FROM   [sph_Object_PRD9PestleEntries]
+         WHERE  [StrategyUUID]= @strategy_uuid
+         -- Snapshot Porter Analysis
+         INSERT INTO [sph_Object_PRD9Porters5]
+                     (
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [ProgressStatus] ,
+                                 [StrategyUUID] ,
+                                 [idea_saving] ,
+                                 [idea_desc] ,
+                                 [idea_title] ,
+                                 [Attachment] ,
+                                 [Long_comment] ,
+                                 [Short_comment] ,
+                                 [threat_new_entry] ,
+                                 [supplier_power] ,
+                                 [competetive_rivalry] ,
+                                 [buyer_power] ,
+                                 [threat_substitution]
+                     )
+         SELECT Getdate() ,
+                [CreatedBy] ,
+                [ProgressStatus] ,
+                @new_strategy_uuid ,
+                [idea_saving] ,
+                [idea_desc] ,
+                [idea_title] ,
+                [Attachment] ,
+                [Long_comment] ,
+                [Short_comment] ,
+                [threat_new_entry] ,
+                [supplier_power] ,
+                [competetive_rivalry] ,
+                [buyer_power] ,
+                [threat_substitution]
+         FROM   [sph_Object_PRD9Porters5]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot Porter'5 Analysis Entries Table
+         INSERT INTO [sph_Object_PRD9Porters5Entries]
+                     (
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [StrategyUUID] ,
+                                 [Entry] ,
+                                 [PESTLE] ,
+                                 [StrategyUUID_original] ,
+                                 [add_pestle] ,
+                                 [add_swot] ,
+                                 [deletion_flag] ,
+                                 [Forces]
+                     )
+         SELECT Getdate() ,
+                [CreatedBy] ,
+                [Entry] ,
+                [PESTLE] ,
+                [StrategyUUID_original] ,
+                [add_pestle] ,
+                [add_swot] ,
+                [deletion_flag] ,
+                [Forces] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9Porters5Entries]
+         WHERE  [StrategyUUID_original] = @strategy_uuid
+         -- Snapshot Kraljic
+         INSERT INTO [sph_Object_PRD9KraljicMatrix]
+                     (
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [StrategyUUID] ,
+                                 [ProgressStatus] ,
+                                 [Idea_title] ,
+                                 [Idea_desc] ,
+                                 [Idea_saving] ,
+                                 [Attachment] ,
+                                 [Short_comment] ,
+                                 [Long_comment]
+                     )
+         SELECT Getdate() ,
+                [CreatedBy] ,
+                @new_strategy_uuid ,
+                [ProgressStatus] ,
+                [Idea_title] ,
+                [Idea_desc] ,
+                [Idea_saving] ,
+                [Attachment] ,
+                [Short_comment] ,
+                [Long_comment]
+         FROM   [sph_Object_PRD9KraljicMatrix]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot Kraljic Entry
+         INSERT INTO [sph_Object_PRD9KraljicMatrixEntry]
+                     (
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [strategy_uuid] ,
+                                 [product_category] ,
+                                 [product] ,
+                                 [SMC_Q1] ,
+                                 [SMC_Q2] ,
+                                 [SMC_Q3] ,
+                                 [SMC_Q4] ,
+                                 [SMC_Q5] ,
+                                 [SMC_Q6] ,
+                                 [SMC_Q7] ,
+                                 [SMC_Q8] ,
+                                 [V2B_Q1] ,
+                                 [V2B_Q2] ,
+                                 [V2B_Q3] ,
+                                 [V2B_Q4] ,
+                                 [V2B_Q5] ,
+                                 [V2B_Q6] ,
+                                 [strategy_uuid_dummy] ,
+                                 [category_uuid] ,
+                                 [category]
+                     )
+         SELECT Getdate() ,
+                [CreatedBy] ,
+                @new_strategy_uuid ,
+                [product_category] ,
+                [product] ,
+                [SMC_Q1] ,
+                [SMC_Q2] ,
+                [SMC_Q3] ,
+                [SMC_Q4] ,
+                [SMC_Q5] ,
+                [SMC_Q6] ,
+                [SMC_Q7] ,
+                [SMC_Q8] ,
+                [V2B_Q1] ,
+                [V2B_Q2] ,
+                [V2B_Q3] ,
+                [V2B_Q4] ,
+                [V2B_Q5] ,
+                [V2B_Q6] ,
+                [strategy_uuid_dummy] ,
+                [category_uuid] ,
+                [category]
+         FROM   [sph_Object_PRD9KraljicMatrixEntry]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot Kraljic Question
+         INSERT INTO [sph_Object_PRD9KraljicQuestions]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [strategy_uuid] ,
+                                 [category_uuid] ,
+                                 [user] ,
+                                 [question_name] ,
+                                 [subCat_uuid] ,
+                                 [question_type] ,
+                                 [answer] ,
+                                 [isActive] ,
+                                 [category_select] ,
+                                 [product_name] ,
+                                 [product_category] ,
+                                 [strategy_uuid_dummy]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                [category_uuid] ,
+                [user] ,
+                [question_name] ,
+                [subCat_uuid] ,
+                [question_type] ,
+                [answer] ,
+                [isActive] ,
+                [category_select] ,
+                [product_name] ,
+                [product_category] ,
+                [strategy_uuid_dummy] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9KraljicQuestions]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot Kraljic Answers
+         INSERT INTO [sph_Object_PRD9KraljicResults]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [question_answer] ,
+                                 [question_uuid] ,
+                                 [category_select] ,
+                                 [category_product] ,
+                                 [question_type] ,
+                                 [strategy_uuid]
+                     )
+         SELECT    t1.[CreatedBy] ,
+                   Getdate() ,
+                   t1.[question_answer] ,
+                   t2.[UUID] ,
+                   t1.[category_select] ,
+                   t1.[category_product] ,
+                   t1.[question_type] ,
+                   t1.[strategy_uuid]
+         FROM      [sph_Object_PRD9KraljicResults]   AS t1
+         LEFT JOIN [sph_Object_PRD9KraljicQuestions] AS t2
+         ON        t1.[question_uuid] = t2.[UUID]
+         WHERE     t2.[strategy_uuid] = @strategy_uuid
+         --DEVELOP Phase
+         -- Snapshot SupplierPreferencing
+         INSERT INTO [sph_Object_PRD9SupplierPreferencing]
+                     (
+                                 [attachment] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [idea_desc] ,
+                                 [idea_name] ,
+                                 [idea_savings] ,
+                                 [long_comment] ,
+                                 [progress] ,
+                                 [short_comment] ,
+                                 [strategy_uuid]
+                     )
+         SELECT [attachment] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [idea_desc] ,
+                [idea_name] ,
+                [idea_savings] ,
+                [long_comment] ,
+                [progress] ,
+                [short_comment] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9SupplierPreferencing]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot SupplierPreferencingEntries
+         INSERT INTO [sph_Object_PRD9SupplierPreferencingEntries]
+                     (
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [Long_comment] ,
+                                 [Portfolio_Analysis_X_Score] ,
+                                 [Portfolio_Analysis_Y_Score] ,
+                                 [Q10_Reference_Customer] ,
+                                 [Q11_Supplier_Hospitability] ,
+                                 [Q12_Supplier_Strategy] ,
+                                 [Q13_Supplier_Key_Resource] ,
+                                 [Q14_Supplier_Spend] ,
+                                 [Q15_Profit_Margin] ,
+                                 [Q1_Spend] ,
+                                 [Q2_Supplier_Impact] ,
+                                 [Q3_Supplier_Switchability] ,
+                                 [Q4_Alternative_Suppliers] ,
+                                 [Q5_Substitute_Suppliers_Products] ,
+                                 [Q6_Relative_Price] ,
+                                 [Q7_Supplier_Importance_Loyalty] ,
+                                 [Q8_Innovative_Ability] ,
+                                 [Q9_supplier_contact_frequency] ,
+                                 [Short_comment] ,
+                                 [strategy_uuid] ,
+                                 [Supplier] ,
+                                 [Supplier_Preferencing_X_Score] ,
+                                 [Supplier_Preferencing_Y_Score]
+                     )
+         SELECT Getdate() ,
+                [CreatedBy] ,
+                [Long_comment] ,
+                [Portfolio_Analysis_X_Score] ,
+                [Portfolio_Analysis_Y_Score] ,
+                [Q10_Reference_Customer] ,
+                [Q11_Supplier_Hospitability] ,
+                [Q12_Supplier_Strategy] ,
+                [Q13_Supplier_Key_Resource] ,
+                [Q14_Supplier_Spend] ,
+                [Q15_Profit_Margin] ,
+                [Q1_Spend] ,
+                [Q2_Supplier_Impact] ,
+                [Q3_Supplier_Switchability] ,
+                [Q4_Alternative_Suppliers] ,
+                [Q5_Substitute_Suppliers_Products] ,
+                [Q6_Relative_Price] ,
+                [Q7_Supplier_Importance_Loyalty] ,
+                [Q8_Innovative_Ability] ,
+                [Q9_supplier_contact_frequency] ,
+                [Short_comment] ,
+                @new_strategy_uuid ,
+                [Supplier] ,
+                [Supplier_Preferencing_X_Score] ,
+                [Supplier_Preferencing_Y_Score]
+         FROM   [sph_Object_PRD9SupplierPreferencingEntries]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot SourcingLevers
+         INSERT INTO [sph_Object_PRD9SourcingLevers]
+                     (
+                                 [Attachment] ,
+                                 [benchmarking] ,
+                                 [category_management] ,
+                                 [co_process_improvement] ,
+                                 [competitor_analysis] ,
+                                 [cost_drivers] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [demand_management] ,
+                                 [idea_desc] ,
+                                 [idea_name] ,
+                                 [idea_savings] ,
+                                 [lever] ,
+                                 [long_comment] ,
+                                 [mt_analysis] ,
+                                 [outsourcing] ,
+                                 [ownership_modeling] ,
+                                 [price_negotiation] ,
+                                 [process_improvement] ,
+                                 [progress_status] ,
+                                 [rationalisation] ,
+                                 [Short_comment] ,
+                                 [strategy_uuid] ,
+                                 [supplier_development] ,
+                                 [supplier_rationalisation] ,
+                                 [supplier_relationship] ,
+                                 [vc_analysis] ,
+                                 [volume_consolidation]
+                     )
+         SELECT [Attachment] ,
+                [benchmarking] ,
+                [category_management] ,
+                [co_process_improvement] ,
+                [competitor_analysis] ,
+                [cost_drivers] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [demand_management] ,
+                [idea_desc] ,
+                [idea_name] ,
+                [idea_savings] ,
+                [lever] ,
+                [long_comment] ,
+                [mt_analysis] ,
+                [outsourcing] ,
+                [ownership_modeling] ,
+                [price_negotiation] ,
+                [process_improvement] ,
+                [progress_status] ,
+                [rationalisation] ,
+                [Short_comment] ,
+                @new_strategy_uuid ,
+                [supplier_development] ,
+                [supplier_rationalisation] ,
+                [supplier_relationship] ,
+                [vc_analysis] ,
+                [volume_consolidation]
+         FROM   [sph_Object_PRD9SourcingLevers]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot DriversCostAdvantage
+         INSERT INTO [sph_Object_PRD9DriversCostAdvantage]
+                     (
+                                 [Attachment] ,
+                                 [CapacityUtilizationImportance] ,
+                                 [CapacityUtilizationInUseComment] ,
+                                 [CapacityUtilizationInUseToda] ,
+                                 [CapacityUtilizationOpportunity] ,
+                                 [CapacityUtilizationOpportunityComment] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [EconomiesoflearningIfinuse,] ,
+                                 [EconomiesoflearningIfinuseComment] ,
+                                 [EconomiesOfLearningImportance] ,
+                                 [Economiesoflearningopportunity] ,
+                                 [Economiesoflearningopportunitycomment] ,
+                                 [EconomiesOfScaleImportance] ,
+                                 [EconomiesOfScaleInUseComment] ,
+                                 [EconomiesOfScaleInUseToday] ,
+                                 [EconomiesOfScaleOpportunity] ,
+                                 [EconomiesOfScaleOpportunityComment] ,
+                                 [idea_desc] ,
+                                 [idea_title] ,
+                                 [idea_saving] ,
+                                 [InputCostsImportance] ,
+                                 [InputCostsInUseComment] ,
+                                 [InputCostsInUseToday] ,
+                                 [InputCostsOpportunity] ,
+                                 [InputCostsOpportunityComment] ,
+                                 [long_comment] ,
+                                 [ProdServiceDesignInImportance] ,
+                                 [ProdServiceDesignInUseComment] ,
+                                 [ProdServiceDesignInUseToday] ,
+                                 [ProdServiceDesignOpportunity] ,
+                                 [ProdServiceDesignOpportunityComment] ,
+                                 [ProductiontechniquesinUse] ,
+                                 [ProductiontechniquesinUseCheckbox] ,
+                                 [ProductiontechniquesOpportunity] ,
+                                 [ProductiontechniquesOpportunityComment] ,
+                                 [ProductiontechniquesUseComment] ,
+                                 [ProgressStatus] ,
+                                 [ResidualEfficiencyImportance] ,
+                                 [ResidualEfficiencyInUseComment] ,
+                                 [ResidualEfficiencyInUseToday] ,
+                                 [ResidualEfficiencyOpportunity] ,
+                                 [ResidualEfficiencyOpportunityComment] ,
+                                 [Short_comment] ,
+                                 [StrategyUUID]
+                     )
+         SELECT [Attachment] ,
+                [CapacityUtilizationImportance] ,
+                [CapacityUtilizationInUseComment] ,
+                [CapacityUtilizationInUseToda] ,
+                [CapacityUtilizationOpportunity] ,
+                [CapacityUtilizationOpportunityComment] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [EconomiesoflearningIfinuse,] ,
+                [EconomiesoflearningIfinuseComment] ,
+                [EconomiesOfLearningImportance] ,
+                [Economiesoflearningopportunity] ,
+                [Economiesoflearningopportunitycomment] ,
+                [EconomiesOfScaleImportance] ,
+                [EconomiesOfScaleInUseComment] ,
+                [EconomiesOfScaleInUseToday] ,
+                [EconomiesOfScaleOpportunity] ,
+                [EconomiesOfScaleOpportunityComment] ,
+                [idea_desc] ,
+                [idea_title] ,
+                [idea_saving] ,
+                [InputCostsImportance] ,
+                [InputCostsInUseComment] ,
+                [InputCostsInUseToday] ,
+                [InputCostsOpportunity] ,
+                [InputCostsOpportunityComment] ,
+                [long_comment] ,
+                [ProdServiceDesignInImportance] ,
+                [ProdServiceDesignInUseComment] ,
+                [ProdServiceDesignInUseToday] ,
+                [ProdServiceDesignOpportunity] ,
+                [ProdServiceDesignOpportunityComment] ,
+                [ProductiontechniquesinUse] ,
+                [ProductiontechniquesinUseCheckbox] ,
+                [ProductiontechniquesOpportunity] ,
+                [ProductiontechniquesOpportunityComment] ,
+                [ProductiontechniquesUseComment] ,
+                [ProgressStatus] ,
+                [ResidualEfficiencyImportance] ,
+                [ResidualEfficiencyInUseComment] ,
+                [ResidualEfficiencyInUseToday] ,
+                [ResidualEfficiencyOpportunity] ,
+                [ResidualEfficiencyOpportunityComment] ,
+                [Short_comment] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9DriversCostAdvantage]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot RiskManagement
+         INSERT INTO [sph_Object_PRD9RiskManagement]
+                     (
+                                 [attachement] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [idea_desc] ,
+                                 [idea_name] ,
+                                 [idea_savings] ,
+                                 [long_comment] ,
+                                 [progress_status] ,
+                                 [short_comment] ,
+                                 [strategy_uuid]
+                     )
+         SELECT [attachement] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [idea_desc] ,
+                [idea_name] ,
+                [idea_savings] ,
+                [long_comment] ,
+                [progress_status] ,
+                [short_comment] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9RiskManagement]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot RiskManagementEntries
+         INSERT INTO [sph_Object_PRD9RiskManagementEntries]
+                     (
+                                 [consequences] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [likelihood_slider] ,
+                                 [mitigation] ,
+                                 [risk_description] ,
+                                 [risk_level] ,
+                                 [risk_name] ,
+                                 [strategy_uuid]
+                     )
+         SELECT [consequences] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [likelihood_slider] ,
+                [mitigation] ,
+                [risk_description] ,
+                [risk_level] ,
+                [risk_name] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9RiskManagementEntries]
+         WHERE  [strategy_uuid] = @strategy_uuid
+         -- Snapshot SupplierPerformance
+         INSERT INTO [sph_Object_PRD9SupplierPerformance]
+                     (
+                                 [attachement] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [idea_desc] ,
+                                 [Idea_title] ,
+                                 [idea_saving] ,
+                                 [long_comment] ,
+                                 [ProgressStatus] ,
+                                 [short_comment] ,
+                                 [StrategyUUID]
+                     )
+         SELECT [attachement] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [idea_desc] ,
+                [Idea_title] ,
+                [idea_saving] ,
+                [long_comment] ,
+                [ProgressStatus] ,
+                [short_comment] ,
+                @new_strategy_uuid
+         FROM   [sph_Object_PRD9SupplierPerformance]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot SupplierPerformanceQuestions
+         INSERT INTO [sph_Object_PRD9SupplierPerformanceQuestions]
+                     (
+                                 [CommercialCostWeight] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [CSRWeight] ,
+                                 [DeliveryWeight] ,
+                                 [InnovationWeight] ,
+                                 [QualityWeight] ,
+                                 [ResponsivenessWeight] ,
+                                 [RiskWeight] ,
+                                 [SustainabilityWeight] ,
+                                 [StrategyUUID] ,
+                                 [test]
+                     )
+         SELECT [CommercialCostWeight] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [CSRWeight] ,
+                [DeliveryWeight] ,
+                [InnovationWeight] ,
+                [QualityWeight] ,
+                [ResponsivenessWeight] ,
+                [RiskWeight] ,
+                [SustainabilityWeight] ,
+                @new_strategy_uuid ,
+                [test]
+         FROM   [sph_Object_PRD9SupplierPerformanceQuestions]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         -- Snapshot SupplierPerformanceSuppliers
+         INSERT INTO [sph_Object_PRD9SupplierPerformanceSuppliers]
+                     (
+                                 [Comment] ,
+                                 [CommercialCostQ1] ,
+                                 [CommercialCostQ2] ,
+                                 [CreatedAt] ,
+                                 [CreatedBy] ,
+                                 [CSRQ1] ,
+                                 [CSRQ2] ,
+                                 [DeliveryQ1] ,
+                                 [DeliveryQ2] ,
+                                 [InnovationQ1] ,
+                                 [InnovationQ2] ,
+                                 [KeyStakeholder] ,
+                                 [QualityQ1] ,
+                                 [QualityQ2] ,
+                                 [ResponsivenessQ1] ,
+                                 [ResponsivenessQ2] ,
+                                 [RiskQ1] ,
+                                 [RiskQ2] ,
+                                 [Spend] ,
+                                 [StrategyUUID] ,
+                                 [Supplier] ,
+                                 [SustainabilityQ1] ,
+                                 [SustainabilityQ2]
+                     )
+         SELECT [Comment] ,
+                [CommercialCostQ1] ,
+                [CommercialCostQ2] ,
+                Getdate() ,
+                [CreatedBy] ,
+                [CSRQ1] ,
+                [CSRQ2] ,
+                [DeliveryQ1] ,
+                [DeliveryQ2] ,
+                [InnovationQ1] ,
+                [InnovationQ2] ,
+                [KeyStakeholder] ,
+                [QualityQ1] ,
+                [QualityQ2] ,
+                [ResponsivenessQ1] ,
+                [ResponsivenessQ2] ,
+                [RiskQ1] ,
+                [RiskQ2] ,
+                [Spend] ,
+                @new_strategy_uuid ,
+                [Supplier] ,
+                [SustainabilityQ1] ,
+                [SustainabilityQ2]
+         FROM   [sph_Object_PRD9SupplierPerformanceSuppliers]
+         WHERE  [StrategyUUID] = @strategy_uuid
+         --FINALIZE Phase
+         --ResultOverview
+         INSERT INTO [sph_Object_PRD9ResultOverview]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [StrategyUUID] ,
+                                 [StrategyResults] ,
+                                 [StrategyThrust] ,
+                                 [StrategyBenefits] ,
+                                 [ProgressStatus] ,
+                                 [Idea_title] ,
+                                 [Idea_desc] ,
+                                 [Idea_saving] ,
+                                 [Attachment] ,
+                                 [Short_comment] ,
+                                 [Long_comment] ,
+                                 [result_overview_score]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [StrategyResults] ,
+                [StrategyThrust] ,
+                [StrategyBenefits] ,
+                [ProgressStatus] ,
+                [Idea_title] ,
+                [Idea_desc] ,
+                [Idea_saving] ,
+                [Attachment] ,
+                [Short_comment] ,
+                [Long_comment] ,
+                [result_overview_score]
+         FROM   [sph_Object_PRD9ResultOverview]
+         WHERE  [StrategyUUID] = @strategy_uuid;
+
+         --Initiative List
+         INSERT INTO [sph_Object_PRD9InitiativeList]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [strategy_uuid] ,
+                                 [attachment] ,
+                                 [progress_status] ,
+                                 [short_comment] ,
+                                 [long_comment] ,
+                                 [progress_status_sp] ,
+                                 [Long_comment1] ,
+                                 [Short_comment1] ,
+                                 [attachment_sourcing_plan] ,
+                                 [idea_name_initiative_list] ,
+                                 [idea_desc_initiative_list] ,
+                                 [idea_savings_initiative_list] ,
+                                 [idea_name_sourcing_plan] ,
+                                 [idea_desc_sourcing_plan] ,
+                                 [idea_savings_sourcing_plan]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [attachment] ,
+                [progress_status] ,
+                [short_comment] ,
+                [long_comment] ,
+                [progress_status_sp] ,
+                [Long_comment1] ,
+                [Short_comment1] ,
+                [attachment_sourcing_plan] ,
+                [idea_name_initiative_list] ,
+                [idea_desc_initiative_list] ,
+                [idea_savings_initiative_list] ,
+                [idea_name_sourcing_plan] ,
+                [idea_desc_sourcing_plan] ,
+                [idea_savings_sourcing_plan]
+         FROM   [sph_Object_PRD9InitiativeList]
+         WHERE  [strategy_uuid] = @strategy_uuid;
+
+         --Initiative List Entries
+         INSERT INTO [sph_Object_PRD9InitiativesListEntries]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [strategy_uuid] ,
+                                 [Type] ,
+                                 [Title] ,
+                                 [description] ,
+                                 [goal] ,
+                                 [benefit_type] ,
+                                 [benefit_value] ,
+                                 [initial_start_date] ,
+                                 [initial_due_date] ,
+                                 [actual_start_date] ,
+                                 [actual_due_date] ,
+                                 [status] ,
+                                 [progress_in_perc] ,
+                                 [initiative_cancelled] ,
+                                 [key_initiative] ,
+                                 [implementation_time] ,
+                                 [benefit_potential] ,
+                                 [milestones] ,
+                                 [deal_size] ,
+                                 [suppliers_binding] ,
+                                 [scope] ,
+                                 [SourcePlaningComment]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [Type] ,
+                [Title] ,
+                [description] ,
+                [goal] ,
+                [benefit_type] ,
+                [benefit_value] ,
+                [initial_start_date] ,
+                [initial_due_date] ,
+                [actual_start_date] ,
+                [actual_due_date] ,
+                [status] ,
+                [progress_in_perc] ,
+                [initiative_cancelled] ,
+                [key_initiative] ,
+                [implementation_time] ,
+                [benefit_potential] ,
+                [milestones] ,
+                [deal_size] ,
+                [suppliers_binding] ,
+                [scope] ,
+                [SourcePlaningComment]
+         FROM   [sph_Object_PRD9InitiativesListEntries]
+         WHERE  [strategy_uuid] = @strategy_uuid;
+
+         --IMPLEMENT PHASE
+         --Execution Planning
+         INSERT INTO [sph_Object_PRD9ExecutionPlanning]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [StrategyUUID] ,
+                                 [ProgressStatus] ,
+                                 [Idea_title] ,
+                                 [Idea_desc] ,
+                                 [Idea_saving] ,
+                                 [Attachment] ,
+                                 [Short_comment] ,
+                                 [Long_comment]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [ProgressStatus] ,
+                [Idea_title] ,
+                [Idea_desc] ,
+                [Idea_saving] ,
+                [Attachment] ,
+                [Short_comment] ,
+                [Long_comment]
+         FROM   [sph_Object_PRD9ExecutionPlanning]
+         WHERE  [StrategyUUID] = @strategy_uuid;
+
+          --Execution Planning Initiatives
+         INSERT INTO [sph_Object_PRD9ExecutionPlanningInitiatives]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [StrategyUUID] ,
+                                 [InitiativeUUID] ,
+                                 [InitiativeStatus] ,
+                                 [InitiativeStartDate] ,
+                                 [InitiativeDueDate]
+                     )
+         SELECT [CreatedBy] ,
+                Getdate() ,
+                @new_strategy_uuid ,
+                [InitiativeUUID] ,
+                [InitiativeStatus] ,
+                [InitiativeStartDate] ,
+                [InitiativeDueDate]
+         FROM   [sph_Object_PRD9ExecutionPlanningInitiatives]
+         WHERE  [StrategyUUID] = @strategy_uuid;
+
+       --Execution Planning Tasks
+         INSERT INTO [sph_Object_PRD9ExecutionPlanningTasks]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [InitiativeUUID] ,
+                                 [TaskTitle] ,
+                                 [ResponsibleStakeholder] ,
+                                 [Status] ,
+                                 [StartDate] ,
+                                 [DueDate] ,
+                                 [Attachments] ,
+                                 [Comments] ,
+                                 [Completed]
+                     )
+         SELECT x.[CreatedBy] ,
+                Getdate() ,
+                x.[InitiativeUUID] ,
+                x.[TaskTitle] ,
+                x.[ResponsibleStakeholder] ,
+                x.[Status] ,
+                x.[StartDate] ,
+                x.[DueDate] ,
+                x.[Attachments] ,
+                x.[Comments],
+                x.[Completed]
+         FROM   [sph_Object_PRD9ExecutionPlanningTasks] as x
+         LEFT JOIN [sph_Object_PRD9ExecutionPlanningInitiatives] as y
+         ON x.[InitiativeUUID] = y.[InitiativeUUID]
+         WHERE  y.[StrategyUUID] = @strategy_uuid;
+
+         --Execution Planning TaskComments
+         INSERT INTO [sph_Object_PRD9ExecutionPlanningTaskComments]
+                     (
+                                 [CreatedBy] ,
+                                 [CreatedAt] ,
+                                 [TaskUUID] ,
+                                 [Comment]
+                     )
+         SELECT r.[CreatedBy] ,
+                Getdate() ,
+                r.[TaskUUID] ,
+                r.[Comment]
+         FROM   [sph_Object_PRD9ExecutionPlanningTaskComments] as r
+         LEFT JOIN [sph_Object_PRD9ExecutionPlanningTasks] as s
+         ON s.[UUID] = r.[TaskUUID]
+         LEFT JOIN [sph_Object_PRD9ExecutionPlanningInitiatives] as t
+         ON s.[InitiativeUUID] = t.[InitiativeUUID]
+         WHERE  t.[StrategyUUID] = @strategy_uuid;
+
+         --Sourcing Plan: everything from other objects
+       END;
