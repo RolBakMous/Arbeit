@@ -31,4 +31,3 @@ END AS 'Subsidiary_Name',
 FROM sph_Object_AS_Assessment_Aggregation AS A
 
 LEFT JOIN sph_Object_AS_SubsidiaryAssessment AS B ON A.Assessment_UUID = B.UUID
-roland
