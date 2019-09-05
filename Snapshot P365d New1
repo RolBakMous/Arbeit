@@ -26,29 +26,89 @@ AS
                             [version] ,
                             [claimed] ,
                             [category_uuid] ,
-                            [active] -- Active / Inactive
-                            ,
+                            [active] , -- Active / Inactive
                             [private] ,
                             [team] ,
-                            [manual_save] -- Toggle man / auto yes / no
+                            [manual_save] , -- Toggle man / auto yes / no
+                            [renew_strategy] ,
+                            [save_strategy] ,
+                            [Version_renew_strategy_comment] ,
+                            [porters5score] ,
+                            [pestleScore] ,
+                            [isPinned] ,
+                            [sourcing_levers_score] ,
+                            [KraljicScore] ,
+                            [bpn_score] ,
+                            [riskmgmt_score] ,
+                            [initiative_score] ,
+                            [stakeholder_mapping_score] ,
+                            [idea_name] ,
+                            [idea_desc] ,
+                            [idea_saving] ,
+                            [dummy_team_internal] ,
+                            [dummy_team_external] ,
+                            [ContractScore] ,
+                            [business_partners] ,
+                            [SwotScore] ,
+                            [supplier_pref_score] ,
+                            [sourcing_plan_score] ,
+                            [AnalyzeScore] ,
+                            [DevelopScore] ,
+                            [ImplementScore] ,
+                            [FinalizeScore] ,
+                            [copy_comment] ,
+                            [cost_drivers_score] ,
+                            [result_overview_score] ,
+                            [category_overview_score] ,
+                            [ExecutionPlanningScore] ,
+                            [supplierPerformance_score]
+
                 )
-    SELECT Getdate() --[CreatedAt]
-           ,
-           a.[claimed] --[CreatedBy]
-           ,
+    SELECT Getdate() ,--[CreatedAt]
+           a.[claimed], --[CreatedBy]
            a.[name] ,
-           @version --latest version
-           ,
+           @version, --latest version
            a.[claimed] ,
            a.[category_uuid] ,
-           'Active' --[active]
-           ,
+           'Active', --[active]
            a.[private] ,
            a.[team] ,
-           'Yes'
+           'Yes' ,
+           [renew_strategy] ,
+           [save_strategy] ,
+           [Version_renew_strategy_comment] ,
+           [porters5score] ,
+           [pestleScore] ,
+           [isPinned] ,
+           [sourcing_levers_score] ,
+           [KraljicScore] ,
+           [bpn_score] ,
+           [riskmgmt_score] ,
+           [initiative_score] ,
+           [stakeholder_mapping_score] ,
+           [idea_name] ,
+           [idea_desc] ,
+           [idea_saving] ,
+           [dummy_team_internal] ,
+           [dummy_team_external] ,
+           [ContractScore] ,
+           [business_partners] ,
+           [SwotScore] ,
+           [supplier_pref_score] ,
+           [sourcing_plan_score] ,
+           [AnalyzeScore] ,
+           [DevelopScore] ,
+           [ImplementScore] ,
+           [FinalizeScore] ,
+           [copy_comment] ,
+           [cost_drivers_score] ,
+           [result_overview_score] ,
+           [category_overview_score] ,
+           [ExecutionPlanningScore] ,
+           [supplierPerformance_score]
     FROM   [sph_Object_PRD9Strategy] a
-    WHERE  a.[UUID] = @strategy_uuid --'AD4F8AC0-0B53-4463-A9CA-2A2AF6FCF0BE'
-           ;
+    WHERE  a.[UUID] = @strategy_uuid; --'AD4F8AC0-0B53-4463-A9CA-2A2AF6FCF0BE'
+
 
     UPDATE [sph_Object_PRD9Strategy]
     SET    [Active] = 'Inactive'
@@ -58,8 +118,7 @@ AS
     DECLARE @new_strategy_uuid NVARCHAR (200)
     SET @new_strategy_uuid =
     (
-             SELECT TOP 1
-                      [UUID]
+             SELECT TOP 1 [UUID]
              FROM     [sph_Object_PRD9Strategy]
              WHERE    [category_uuid] = @category_uuid
              ORDER BY [version] DESC);

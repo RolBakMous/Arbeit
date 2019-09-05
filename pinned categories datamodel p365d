@@ -1,0 +1,43 @@
+--The Data Model just shows the data that are corresponding to NOT HIDDEN Strategies
+-- The data model is changed on 02.08. Instead of PRD9Users, the join is performed on sph_Users as by this date the PRD9Users object is not updated to have all the users.
+
+ALTER VIEW "PRD9PinnedCategories" AS
+SELECT T1.*, T2.[CATGROUPNAME], T3.[username], CONCAT(T4.[Firstname], ' ', T4.[Lastname]) AS CategoryOwner
+FROM [sph_Object_PRD9Strategy] T1
+INNER JOIN [sph_Object_PRD9CategoryGroups] T2
+ON T1.[category_uuid] = T2.[UUID]
+INNER JOIN [sph_Object_PRD9PinnedCategories] T3
+ON T1.[category_uuid] = T3.[category_uuid]
+--INNER JOIN [sph_Object_PRD9Users] T4
+--ON T1.[claimed] = T4.[ID]
+INNER JOIN [sph_Users] T4
+ON T1.[claimed] = T4.[ID]
+WHERE T1.[Active] = 'Active' AND T1.[Private] = 'No' AND T3.[active] = 1
+
+UNION
+
+SELECT T1.*, T2.[eClassName], T3.[username], CONCAT(T4.[Firstname], ' ', T4.[Lastname]) AS CategoryOwner
+FROM [sph_Object_PRD9Strategy] T1
+INNER JOIN [sph_Object_PRD9CatLevel1] T2
+ON T1.[category_uuid] = T2.[UUID]
+INNER JOIN [sph_Object_PRD9PinnedCategories] T3
+ON T1.[category_uuid] = T3.[category_uuid]
+INNER JOIN [sph_Users] T4
+ON T1.[claimed] = T4.[ID]
+--INNER JOIN [sph_Object_PRD9Users] T4
+--ON T1.[claimed] = T4.[UserID]
+WHERE T1.[Active] = 'Active' AND T1.[Private] = 'No' AND T3.[active] = 1
+
+UNION
+
+SELECT T1.*, T2.[eClassName], T3.[username], CONCAT(T4.[Firstname], ' ', T4.[Lastname]) AS CategoryOwner
+FROM [sph_Object_PRD9Strategy] T1
+INNER JOIN [sph_Object_PRD9CatLevel2] T2
+ON T1.[category_uuid] = T2.[UUID]
+INNER JOIN [sph_Object_PRD9PinnedCategories] T3
+ON T1.[category_uuid] = T3.[category_uuid]
+INNER JOIN [sph_Users] T4
+ON T1.[claimed] = T4.[ID]
+--INNER JOIN [sph_Object_PRD9Users] T4
+--ON T1.[claimed] = T4.[UserID]
+WHERE T1.[Active] = 'Active' AND T1.[Private] = 'No' AND T3.[active] = 1

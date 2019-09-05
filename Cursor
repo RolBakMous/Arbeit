@@ -1,15 +1,17 @@
--Declare the cursors that will loop through the objects
-	  DECLARE get_UUID CURSOR FOR (SELECT [UUID] FROM [sph_Object_ISC9KVG_AM])
+--Declare the cursors that will loop through the objects
+DECLARE Fill_Scores CURSOR FOR (SELECT [ID] FROM [sph_Object_AS_Assessment_Berichterstattung_BM])
 
-	  --Loop over UUID
-	  OPEN get_UUID;
-	  FETCH NEXT FROM get_UUID INTO @KVG_AM_UUID;
-	  WHILE @@FETCH_STATUS = 0
-	  BEGIN
+--Loop over UUID
+OPEN Fill_Scores;
+FETCH NEXT FROM Fill_Scores INTO @get_ID;
+WHILE @@FETCH_STATUS = 0
+BEGIN
 
-FETCH NEXT FROM get_UUID INTO @KVG_AM_UUID;
-		END
+EXEC [dbo].[AS_BerichterstattungCheckScoresProgress_BM]@get_ID=@assessment_ID;
 
-	CLOSE get_UUID;
-	-- Deallocate the declared cursors
- 	DEALLOCATE get_UUID
+FETCH NEXT FROM Fill_Scores INTO @get_ID
+END
+
+CLOSE Fill_Scores;
+-- Deallocate the declared cursors
+DEALLOCATE Fill_Scores

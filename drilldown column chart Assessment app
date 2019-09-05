@@ -1,344 +1,349 @@
 <div ng-controller="DataLoader1" id="DrilldownColumn">
-        <!-- Optional for best performance, it will use the cached data from 1 object -->
+    <!-- Optional for best performance, it will use the cached data from 1 object -->
 
-        <sofy-cache-object-definition object-uuid="0C0C677F-61ED-4E28-A578-637652E2390C">
+    <sofy-cache-object-definition object-uuid="0C0C677F-61ED-4E28-A578-637652E2390C">
 
-      <!-- Getting the field data, model is the global variable.. Field UUID is the actually UUID of the field you are trying to display -->
-      <!-- <sofy-object-field object="object" field-uuid="FDFBB409-1492-4FA1-9A99-E885A8CF65B0" model="objectData"></sofy-object-field> -->
-      </sofy-cache-object-definition>
-    </div>
-
-
-    <div ng-controller="DataLoader2">
-        <!-- Optional for best performance, it will use the cached data from 1 object -->
-
-          <sofy-cache-object-definition object-uuid="0C0C677F-61ED-4E28-A578-637652E2390C"></sofy-cache-object-definition>
-
-    </div>
-
-    <script>
-    // Global variables
-
-    var dataRowAggregation = [];
-    var dataRowSubsidiary = [];
-    var dataRowAll = [];
-    var konzern = [];
-    var subsidiary = ["Pre-Assessment CC", "Monitor Report", "Volkswagen, zentral (CC) (Wolfsburg*)", "TRATON (München*)", "MAN (München*)", "Scania (Södertälje*)", "Audi (Ingolstadt*, Puebla*)", "Porsche Holding Salzburg/ Porsche Bank AG (Salzburg*, Berlin*)", "Porsche AG (Stuttgart*)/ Porsche FS GmbH (Bietigheim – Bissingen*)", "SEAT (Martorell*)", "Skoda (Mladá Boleslav*)", "VW Group China (Beijing*)", "Volkswagen, VW PKW (Wolfsburg*, Puebla*, Kaluga*, Uitenhagen*)", "Reporting Brands", "Pre-Assessment Financial Services", "Volkswagen Finance (China) Co. (Peking*)", "Volkswagen Bank, S.A., Institución de Banca Múltiple (Puebla*)", "VW Credit, Inc. (Herndon*)", "VW Financial Services AG (Brunswick*)", "Pre-Assessment Bank", "VW Bank GmbH (Brunswick*)", "Volkswagen Bank GmbH, Branch Spain (Madrid*)", "VOLKSWAGEN BANK POLSKA S.A. (Warsaw*)", "Group Reporting (VW AG)"];
-    var jahr = [];
-    var section = [];
-    var dataRowAll = [];
-
-    // Average
-    var AVERAGE = [];
-
-    // Sort the rows
-    var bool1 = 0;
-    var bool2 = 0;
-
-    // Dataloader -> Load data from first object. In this case it's the AS_Assessment_Aggregation object.
-
-        ControllerProvider("DataLoader1", function ($rootScope, $location, $scope) {
-            //Provide UUID of the Object
-            var ObjectUUID = '79A4176B-E5DE-4791-BF95-0D7320906846'; // ObjectUUID for "AS_Assessment_Aggregation"
-            //Provide the UUID of the object template - used for authorization purposes
-            var ObjectTemplateUUID = 'BEA7590E-A33C-4CF3-ABFC-2D4ABCAFDEE7'; //ISC9 Test Highcharts
-
-            // Variables to store the object data
-            var assesUUID = [];
-            var assesScore_Overall = [];
-            var assesScore_Orga = [];
-            var assesScore_Budget = [];
-            var assesScore_Planung = [];
-            var assesScore_Vorbereitung = [];
-            var assesScore_Pruefung = [];
-            var assesScore_Berichterst = [];
-            var assesScore_Pruefnacharb = [];
-            var assesScore_Followup = [];
-            var assesScore_Auswahl = [];
-            var assesScore_Entwicklung = [];
-            var assesScore_Fuehrung = [];
+  <!-- Getting the field data, model is the global variable.. Field UUID is the actually UUID of the field you are trying to display -->
+  <!-- <sofy-object-field object="object" field-uuid="FDFBB409-1492-4FA1-9A99-E885A8CF65B0" model="objectData"></sofy-object-field> -->
+  </sofy-cache-object-definition>
+</div>
 
 
-            $scope.objectData = {};
-            $scope.loadMyData = function () {
+<div ng-controller="DataLoader2">
+    <!-- Optional for best performance, it will use the cached data from 1 object -->
+
+      <sofy-cache-object-definition object-uuid="0C0C677F-61ED-4E28-A578-637652E2390C"></sofy-cache-object-definition>
+
+</div>
+
+<script>
+// Global variables
+
+var dataRowAggregation = [];
+var dataRowSubsidiary = [];
+var dataRowAll = [];
+var konzern = [];
+var subsidiary = ["Pre-Assessment CC", "Monitor Report", "Volkswagen, zentral (CC) (Wolfsburg*)", "TRATON (München*)", "MAN (München*)", "Scania (Södertälje*)", "Audi (Ingolstadt*, Puebla*)", "Porsche Holding Salzburg/ Porsche Bank AG (Salzburg*, Berlin*)", "Porsche AG (Stuttgart*)/ Porsche FS GmbH (Bietigheim – Bissingen*)", "SEAT (Martorell*)", "Skoda (Mladá Boleslav*)", "VW Group China (Beijing*)", "Volkswagen, VW PKW (Wolfsburg*, Puebla*, Kaluga*, Uitenhagen*)", "Reporting Brands", "Pre-Assessment Financial Services", "Volkswagen Finance (China) Co. (Peking*)", "Volkswagen Bank, S.A., Institución de Banca Múltiple (Puebla*)", "VW Credit, Inc. (Herndon*)", "VW Financial Services AG (Brunswick*)", "Pre-Assessment Bank", "VW Bank GmbH (Brunswick*)", "Volkswagen Bank GmbH, Branch Spain (Madrid*)", "VOLKSWAGEN BANK POLSKA S.A. (Warsaw*)", "Group Reporting (VW AG)"];
+var jahr = [];
+var section = [];
+var dataRowAll = [];
+
+// Average
+var AVERAGE = [];
+
+// Sort the rows
+var bool1 = 0;
+var bool2 = 0;
+
+// Dataloader -> Load data from first object. In this case it's the AS_Assessment_Aggregation object.
+
+    ControllerProvider("DataLoader1", function ($rootScope, $location, $scope) {
+        //Provide UUID of the Object
+        var ObjectUUID = '79A4176B-E5DE-4791-BF95-0D7320906846'; // ObjectUUID for "AS_Assessment_Aggregation"
+        //Provide the UUID of the object template - used for authorization purposes
+        var ObjectTemplateUUID = 'BEA7590E-A33C-4CF3-ABFC-2D4ABCAFDEE7'; //
+
+        // Variables to store the object data
+        var assesUUID = [];
+        var assesScore_Overall = [];
+        var assesScore_Orga = [];
+        var assesScore_Budget = [];
+        var assesScore_Planung = [];
+        var assesScore_Vorbereitung = [];
+        var assesScore_Pruefung = [];
+        var assesScore_Berichterst = [];
+        var assesScore_Pruefnacharb = [];
+        var assesScore_Followup = [];
+        var assesScore_Auswahl = [];
+        var assesScore_Entwicklung = [];
+        var assesScore_Fuehrung = [];
 
 
-                var getParam = $location.search();
-                var applicationID = getParam.application;
+        $scope.objectData = {};
+        $scope.loadMyData = function () {
 
-                $scope.applicationID = applicationID;
-                $rootScope.loadObject(ObjectUUID, null, function (err, result) {
-                      if (err)
-                      {
-                          console.log(err);
-                          alert(err);
-                      }
-                      else {
-                        $scope.objectData = result;
 
-                        //alert(  JSON.stringify( $scope.objectData ) );
-                            for (var key in $scope.objectData) {
-                                var v = $scope.objectData[key];
-                                for (var key2 in v) {
-                                    if (key2 == "Assessment_UUID") {
-                                        assesUUID.push(v['Assessment_UUID'])
-                                    };
-                                    if (key2 == "Overall_Score") {
-                                        assesScore_Overall.push(v['Overall_Score'])
-                                    };
-                                    if (key2 == "Score_Orga") {
-                                        assesScore_Orga.push(v['Score_Orga'])
-                                    };
-                                    if (key2 == "Score_Budget") {
-                                        assesScore_Budget.push(v['Score_Budget'])
-                                    };
-                                    if (key2 == "Score_Planung") {
-                                        assesScore_Planung.push(v['Score_Planung'])
-                                    };
-                                    if (key2 == "Score_Vorbereitung") {
-                                        assesScore_Vorbereitung.push(v['Score_Vorbereitung'])
-                                    };
-                                    if (key2 == "Score_Pruefung") {
-                                        assesScore_Pruefung.push(v['Score_Pruefung'])
-                                    };
-                                    if (key2 == "Score_Berichterst") {
-                                        assesScore_Berichterst.push(v['Score_Berichterst'])
-                                    };
-                                    if (key2 == "Score_Pruefnacharb") {
-                                        assesScore_Pruefnacharb.push(v['Score_Pruefnacharb'])
-                                    };
-                                    if (key2 == "Score_Followup") {
-                                        assesScore_Followup.push(v['Score_Followup'])
-                                    };
-                                    if (key2 == "Score_Auswahl") {
-                                        assesScore_Auswahl.push(v['Score_Auswahl'])
-                                    };
-                                    if (key2 == "Score_Entwicklung") {
-                                        assesScore_Entwicklung.push(v['Score_Entwicklung'])
-                                    };
-                                    if (key2 == "Score_Fuehrung") {
-                                        assesScore_Fuehrung.push(v['Score_Fuehrung'])
-                                    };
-                                }
-                            }
-                            SuperCombi1(assesUUID, assesScore_Overall, assesScore_Orga,
-                                assesScore_Budget, assesScore_Planung, assesScore_Vorbereitung,
-                                assesScore_Pruefung, assesScore_Berichterst, assesScore_Pruefnacharb,
-                                assesScore_Followup, assesScore_Auswahl, assesScore_Entwicklung,
-                                assesScore_Fuehrung);
-                            //set boolean1 = 1 to signalize that Supercombi1 is finished
-                            Calc_AVG(assesScore_Overall);
-                            bool1 = 1;
-                            if(bool1 == 1 && bool2 == 1){
-                              GenerateFinal();
-                            }
+            var getParam = $location.search();
+            var applicationID = getParam.application;
 
-                      }
-                  },{
-                      uiUUID: ObjectTemplateUUID,
-                      filter: {
-                        applicationUUID: applicationID
-                       }
-                     });
-                  };
-                  $scope.loadMyData(assesScore_Overall);
-        });
+            $scope.applicationID = applicationID;
+            $rootScope.loadObject(ObjectUUID, null, function (err, result) {
+                  if (err)
+                  {
+                      console.log(err);
+                      alert(err);
+                  }
+                  else {
+                    $scope.objectData = result;
 
-        ControllerProvider("DataLoader2", function ($rootScope, $location, $scope) {
-            // Provide UUID of the Oject
-            var ObjectUUID2 = 'D37F2DC5-D87F-44AC-90A1-8B2E2091996B'; // AS_SubsidiaryAssessment
-
-            //Provide the UUID of the object template - used for authorization purposes
-            var ObjectTemplateUUID2 = '6E4168D6-E272-409B-AA76-58945CB08091'; //New Assessment
-
-            // Global variables to store the object data
-            var subsUUID = [];
-            var subsName = [];
-            var subsSales = [];
-            var subsNOE = []; // Field "Number of Employees"
-            var subsBusiness = [];
-            var subsCompany = [];
-
-            $scope.objectData = {};
-            $scope.loadMyData = function () {
-                var getParam1 = $location.search();
-                var applicationID1 = getParam1.application;
-                $scope.applicationID1 = applicationID1;
-                $rootScope.loadObject(ObjectUUID2, null, function (err, result) {
-                    // if API returns an error
-                    if (err)
-                    {
-                        consol.log(err);
-                        alert(err);
-                    }
-                    else {
-                        //After success, Objects that meet filter are returned in callback as result
-                        $scope.objectData = result;
-                        //alert(  JSON.stringify( $scope.objectData ) );
+                    //alert(  JSON.stringify( $scope.objectData ) );
                         for (var key in $scope.objectData) {
                             var v = $scope.objectData[key];
                             for (var key2 in v) {
-                                if (key2 == "UUID") {
-                                    subsUUID.push(v['UUID']);
-                                }
-                                if (key2 == "Subsidiary_Name") {
-                                    subsName.push(v['Subsidiary_Name']);
-                                }
-                                if (key2 == "Sales") {
-                                    subsSales.push(v['Sales']);
-                                }
-                                if (key2 == "NumberOfEmployees") {
-                                    subsNOE.push(v['NumberOfEmployees']);
-                                }
-                                if (key2 == "Business") {
-                                    subsBusiness.push(v['Business']);
-                                }
-                                if (key2 == "Company") {
-                                    subsCompany.push(v['Company']);
-                                }
+                                if (key2 == "Assessment_UUID") {
+                                    assesUUID.push(v['Assessment_UUID'])
+                                };
+                                if (key2 == "Overall_Score") {
+                                    assesScore_Overall.push(v['Overall_Score'])
+                                };
+                                if (key2 == "Score_Orga") {
+                                    assesScore_Orga.push(v['Score_Orga'])
+                                };
+                                if (key2 == "Score_Budget") {
+                                    assesScore_Budget.push(v['Score_Budget'])
+                                };
+                                if (key2 == "Score_Planung") {
+                                    assesScore_Planung.push(v['Score_Planung'])
+                                };
+                                if (key2 == "Score_Vorbereitung") {
+                                    assesScore_Vorbereitung.push(v['Score_Vorbereitung'])
+                                };
+                                if (key2 == "Score_Pruefung") {
+                                    assesScore_Pruefung.push(v['Score_Pruefung'])
+                                };
+                                if (key2 == "Score_Berichterst") {
+                                    assesScore_Berichterst.push(v['Score_Berichterst'])
+                                };
+                                if (key2 == "Score_Pruefnacharb") {
+                                    assesScore_Pruefnacharb.push(v['Score_Pruefnacharb'])
+                                };
+                                if (key2 == "Score_Followup") {
+                                    assesScore_Followup.push(v['Score_Followup'])
+                                };
+                                if (key2 == "Score_Auswahl") {
+                                    assesScore_Auswahl.push(v['Score_Auswahl'])
+                                };
+                                if (key2 == "Score_Entwicklung") {
+                                    assesScore_Entwicklung.push(v['Score_Entwicklung'])
+                                };
+                                if (key2 == "Score_Fuehrung") {
+                                    assesScore_Fuehrung.push(v['Score_Fuehrung'])
+                                };
                             }
                         }
-                        //alert( JSON.stringify ( AssetManager ) );
-                        SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany);
-                        bool2 = 1;
+                        SuperCombi1(assesUUID, assesScore_Overall, assesScore_Orga,
+                            assesScore_Budget, assesScore_Planung, assesScore_Vorbereitung,
+                            assesScore_Pruefung, assesScore_Berichterst, assesScore_Pruefnacharb,
+                            assesScore_Followup, assesScore_Auswahl, assesScore_Entwicklung,
+                            assesScore_Fuehrung);
+                        //set boolean1 = 1 to signalize that Supercombi1 is finished
+                        Calc_AVG(assesScore_Overall);
+                        bool1 = 1;
                         if(bool1 == 1 && bool2 == 1){
                           GenerateFinal();
                         }
-                      }
-                      },{
-                            uiUUID: ObjectTemplateUUID2,
-                            filter: {
-                              applicationUUID: applicationID1
+
+                  }
+              },{
+                  uiUUID: ObjectTemplateUUID,
+                  filter: {
+                    applicationUUID: applicationID
+                   }
+                 });
+              };
+              $scope.loadMyData(assesScore_Overall);
+    });
+
+    ControllerProvider("DataLoader2", function ($rootScope, $location, $scope) {
+        // Provide UUID of the Oject
+        var ObjectUUID2 = 'D37F2DC5-D87F-44AC-90A1-8B2E2091996B'; // AS_SubsidiaryAssessment
+
+        //Provide the UUID of the object template - used for authorization purposes
+        var ObjectTemplateUUID2 = '6E4168D6-E272-409B-AA76-58945CB08091'; //New Assessment
+
+        // Global variables to store the object data
+        var subsUUID = [];
+        var subsName = [];
+        var subsSales = [];
+        var subsNOE = []; // Field "Number of Employees"
+        var subsBusiness = [];
+        var subsCompany = [];
+
+        $scope.objectData = {};
+        $scope.loadMyData = function () {
+            var getParam1 = $location.search();
+            var applicationID1 = getParam1.application;
+            $scope.applicationID1 = applicationID1;
+            $rootScope.loadObject(ObjectUUID2, null, function (err, result) {
+                // if API returns an error
+                if (err)
+                {
+                    consol.log(err);
+                    alert(err);
+                }
+                else {
+                    //After success, Objects that meet filter are returned in callback as result
+                    $scope.objectData = result;
+                    //alert(  JSON.stringify( $scope.objectData ) );
+                    for (var key in $scope.objectData) {
+                        var v = $scope.objectData[key];
+                        for (var key2 in v) {
+                            if (key2 == "UUID") {
+                                subsUUID.push(v['UUID']);
+                            }
+                            if (key2 == "Subsidiary_Name") {
+                                subsName.push(v['Subsidiary_Name']);
+                            }
+                            if (key2 == "Sales") {
+                                subsSales.push(v['Sales']);
+                            }
+                            if (key2 == "NumberOfEmployees") {
+                                subsNOE.push(v['NumberOfEmployees']);
+                            }
+                            if (key2 == "Business") {
+                                subsBusiness.push(v['Business']);
+                            }
+                            if (key2 == "Company") {
+                                subsCompany.push(v['Company']);
                             }
                         }
-                      );
-            };
-            //Just execute function so it loads the data when page is loading (in function because it can then easily be reload)
+                    }
+                    //alert( JSON.stringify ( AssetManager ) );
+                    SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany);
+                    bool2 = 1;
+                    if(bool1 == 1 && bool2 == 1){
+                      GenerateFinal();
+                    }
+                  }
+                  },{
+                        uiUUID: ObjectTemplateUUID2,
+                        filter: {
+                          applicationUUID: applicationID1
+                        }
+                    }
+                  );
+        };
+        //Just execute function so it loads the data when page is loading (in function because it can then easily be reload)
 
-                  $scope.loadMyData();
-        });
+              $scope.loadMyData();
+    });
 
-    function SuperCombi1(assesUUID, assesScore_Overall, assesScore_Orga, assesScore_Budget,
-        assesScore_Planung, assesScore_Vorbereitung, assesScore_Pruefung, assesScore_Berichterst,
-        assesScore_Pruefnacharb, assesScore_Followup, assesScore_Auswahl, assesScore_Entwicklung, assesScore_Fuehrung) {
-        for (var x = 0; x < assesUUID.length; x++){
-            var row = 'UUID:'.concat(assesUUID[x],";OverallScore:", assesScore_Overall[x],";ScoreOrga:", assesScore_Orga[x],";ScoreBudget:", assesScore_Budget[x],";ScorePlanung:", assesScore_Planung[x],";ScoreVorereitung:", assesScore_Vorbereitung[x],";ScorePruefung:", assesScore_Pruefung[x],";ScoreBerichterst:", assesScore_Berichterst[x],";ScorePruefnacharb:", assesScore_Pruefnacharb[x],";ScoreFollowup:", assesScore_Followup[x],";ScoreAuswahl:", assesScore_Auswahl[x],";ScoreEntwicklung:", assesScore_Entwicklung[x],";ScoreFuehrung:", assesScore_Fuehrung[x]);
-            dataRowAggregation.push(row);
+function SuperCombi1(assesUUID, assesScore_Overall, assesScore_Orga, assesScore_Budget,
+    assesScore_Planung, assesScore_Vorbereitung, assesScore_Pruefung, assesScore_Berichterst,
+    assesScore_Pruefnacharb, assesScore_Followup, assesScore_Auswahl, assesScore_Entwicklung, assesScore_Fuehrung) {
+    for (var x = 0; x < assesUUID.length; x++){
+        var row = {"UUID":assesUUID[x] , "OverallScore":assesScore_Overall[x] , "ScoreOrga": assesScore_Orga[x] , "ScoreBudget": assesScore_Budget[x] , "ScorePlanung": assesScore_Planung[x] , "ScoreVorbereitung": assesScore_Vorbereitung[x] , "ScorePruefung": assesScore_Pruefung[x] , "ScoreBerichterst": assesScore_Berichterst[x] , "ScorePruefnacharb": assesScore_Pruefnacharb[x] , "ScoreFollowup": assesScore_Followup[x] , "ScoreAuswahl": assesScore_Auswahl[x] , "ScoreEntwicklung": assesScore_Entwicklung[x] , "ScoreFuehrung": assesScore_Fuehrung[x]};
+        dataRowAggregation.push(row);
+    }
+  };
+  // SuperCombi2 function to concate each fetchedvalue into one data row for Subsisdiary Assessment object
+function SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany) {
+    for (var r = 0; r < subsUUID.length; r++){
+      var row = {"ASUUID":subsUUID[r] , "subsName": subsName[r] ,"Sales": subsSales[r] , "NumberOfEmployees": subsNOE[r] , "Business": subsBusiness[r] , "Company": subsCompany[r]};
+
+      dataRowSubsidiary.push(row);
+     }
+  };
+
+function GenerateFinal() {
+    //  alert(dataRowAggregation[0]["OverallScore"]);
+    //  alert(dataRowSubsidiary[0]["ASUUID"]);
+     for (var a = 0; a < dataRowSubsidiary.length; a++) {
+         for (var b = 0; b < dataRowAggregation.length; b++){
+             if(dataRowSubsidiary[a]["ASUUID"] == dataRowAggregation[b]["UUID"]){
+               dataRowAll.push(jQuery.extend(dataRowSubsidiary[a], dataRowAggregation[b]));
+             }
+         };
+     };
+     //alert(JSON.stringify(dataRowAll));
+    GenerateChart();
+};
+
+function Calc_AVG(assesScore_Overall) {
+
+      //alert(assesScore_Overall);
+      var filtered = assesScore_Overall.filter( function (el) {return el != null});
+      //average per category, rount for 2 decimals
+      let sum_so = assesScore_Overall.reduce((previous, current) => current += previous);
+      let avg_so = sum_so / filtered.length;
+      //  let round_sg = avg_sg.toFixed(2);
+      //alert(round_sg);
+
+      //alert("sg=" + round_sg + "sf=" +round_sf +"PuT=" + round_PuT +"IuC=" + round_IuC +"IA=" + round_IA +"Rc=" + round_Rc +"ITS=" + round_ITS +"RA=" + round_RA );
+      var AVG1 = [avg_so];
+      var name11 = "Average";
+      var color_avg = '#87868C';
+      var VORAVERAGE = {
+          "name": name11,
+          "data": AVG1,
+          "color": color_avg
+      };
+
+      AVERAGE.push(AVG1);
+        //alert(AVERAGE);
+      //alert( JSON.stringify(AVERAGE) );
+  };
+
+// Begin building the column bar chart with drilldown funktion
+function GenerateChart () {
+// Processing the data and fill into the final variables
+//alert(AVERAGE);
+
+var dataJson =  '[{"name": "VW", "y":'+AVERAGE+', "drilldown": "VW"}]'; //'[{"name": "VW", "y": 0.5, "drilldown": "VW_BU"}]'
+//alert(dataJson);
+var dataArray1 = [];
+var dataArray2 = [];
+// alert(dataRowAll[0]["OverallScore"]);
+for(var a = 0; a < dataRowAll.length; a++){
+    if (dataRowAll[a]["OverallScore"] != null){
+    var roland = '{"name":"'+subsidiary[dataRowAll[a]["subsName"]]+'", "y":'+dataRowAll[a]["OverallScore"]+', "drilldown": "'+dataRowAll[a]["UUID"]+'"}';
+    var section1 = '{"id": "'+dataRowAll[a]["UUID"]+'", "data": [["Orga",'+dataRowAll[a]["ScoreOrga"]+'],["Budget",'+dataRowAll[a]["ScoreBudget"]+'],["Planung",'+dataRowAll[a]["ScorePlanung"]+'],["Vorbereitung",'+dataRowAll[a]["ScoreVorbereitung"]+'],["Prüfung",'+dataRowAll[a]["ScorePruefung"]+'],["Berichterstattung",'+dataRowAll[a]["ScoreBerichterst"]+'],["Prüfungsnacharbeit",'+dataRowAll[a]["ScorePruefnacharb"]+'],["Follow Up",'+dataRowAll[a]["ScoreFollowup"]+'],["Auswahl",'+dataRowAll[a]["ScoreAuswahl"]+'],["Entwicklung",'+dataRowAll[a]["ScoreEntwicklung"]+'],["Führung",'+dataRowAll[a]["ScoreFuehrung"]+']]}';
+    dataArray1.push(roland);
+    dataArray2.push(section1);
+    }
+};
+
+var dataDrilldown = '[{"name": "average score", "id": "VW","type":"column","color":"#051141", "data":['+ dataArray1 +']},'+dataArray2+']';
+//alert(dataDrilldown);
+// Parse the variable to JSON format
+var data1 = JSON.parse(dataJson);
+var drilldown = JSON.parse(dataDrilldown);
+
+// Create the chart
+Highcharts.chart('DrilldownColumn', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'VW Assessment Reporting'
+    },
+    /*subtitle: {
+        text: 'Click the columns to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+    },*/
+    xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Score'
         }
 
-      };
-      // SuperCombi2 function to concate each fetchedvalue into one data row for Subsisdiary Assessment object
-    function SuperCombi2(subsUUID, subsName, subsSales, subsNOE, subsBusiness, subsCompany) {
-        for (var r = 0; r < subsUUID.length; r++){
-          var row = 'ASUUID:'.concat(subsUUID[r],";subsName:", subsName[r],";Sales:", subsSales[r],";NumberOfEmployees:", subsNOE[r],";Business:", subsBusiness[r],";Company:", subsCompany[r]);
-          dataRowSubsidiary.push(row);
-         }
-      };
-
-    function GenerateFinal() {
-         //alert(JSON.stringify(dataRowAggregation));
-         //alert(JSON.stringify(dataRowSubsidiary));
-         for (var a = 0; a < dataRowSubsidiary.length; a++) {
-             for (var b = 0; b < dataRowAggregation.length; b++){
-                 if(dataRowSubsidiary[a]["UUID"] == dataRowAggregation[b]["ASUUID"]){
-                   dataRowAll.push(dataRowSubsidiary[a].concat(dataRowAggregation[b]));
-                 }
-             };
-         };
-         //alert(JSON.stringify(dataRowAll));
-        GenerateChart();
-    };
-
-    function Calc_AVG(assesScore_Overall) {
-
-        //   alert(assesScore_Overall);
-          //average per category, rount for 2 decimals
-          let sum_so = assesScore_Overall.reduce((previous, current) => current += previous);
-          let avg_so = sum_so / assesScore_Overall.length;
-          //  let round_sg = avg_sg.toFixed(2);
-          //alert(round_sg);
-
-          //alert("sg=" + round_sg + "sf=" +round_sf +"PuT=" + round_PuT +"IuC=" + round_IuC +"IA=" + round_IA +"Rc=" + round_Rc +"ITS=" + round_ITS +"RA=" + round_RA );
-          var AVG1 = [avg_so];
-          var name11 = "Average";
-          var color_avg = '#87868C';
-          var VORAVERAGE = {
-              "name": name11,
-              "data": AVG1,
-              "color": color_avg
-          };
-
-          AVERAGE.push(AVG1);
-            //alert(AVERAGE);
-
-          //alert( JSON.stringify(AVERAGE) );
-      };
-
-    // Begin building the column bar chart with drilldown funktion
-    function GenerateChart () {
-    // Processing the data and fill into the final variables
-    //alert(AVERAGE);
-
-    var dataJson =  '[{"name": "VW", "y":'+AVERAGE+', "drilldown": "VW"}]'; //'[{"name": "VW", "y": 0.5, "drilldown": "VW_BU"}]'
-    //alert(dataJson);
-    var dataArray = [];
-
-    //alert(dataRowAll[0][1]);
-    for(var a = 0; a < subsidiary.length; a++){
-
-        var roland = '{"name":"'+subsidiary[a]+'", "y": 0.1, "drilldown": "'+subsidiary[a]+'"}';
-        dataArray.push(roland);
-    };
-    var dataDrilldown = '[{"name": "average score", "id": "VW","type":"column","color":"#051141", "data":['+ dataArray +']}, {"id":"Pre-Assessment CC", "data":[["test", 1], ["test", 2]]}]';
-    // Parse the variable to JSON format
-    var data1 = JSON.parse(dataJson);
-    var drilldown = JSON.parse(dataDrilldown);
-
-    // Create the chart
-    Highcharts.chart('DrilldownColumn', {
-        chart: {
-            type: 'column'
-        },
-        title: {
-            text: 'VW Assessment Reporting'
-        },
-        /*subtitle: {
-            text: 'Click the columns to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
-        },*/
-        xAxis: {
-            type: 'category'
-        },
-        yAxis: {
-            title: {
-                text: 'Score'
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            borderWidth: 0,
+            dataLabels: {
+                enabled: true,
+                format: '{point.y:.1f}%'
             }
+        }
+    },
 
-        },
-        legend: {
-            enabled: false
-        },
-        plotOptions: {
-            series: {
-                borderWidth: 0,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.y:.1f}%'
-                }
-            }
-        },
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+    },
 
-        tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
-        },
+    series:[ {
+      name: "Mutterkonzern", colorByPoint: true, data: data1 }
+    ],
+    drilldown: {
+      series: drilldown
+     }
 
-        series:[ {
-          name: "Mutterkonzern", colorByPoint: true, data: data1 }
-        ],
-        drilldown: {
-          series: drilldown
-         }
-
-         });
-    };
-    </script>
+     });
+};
+</script>

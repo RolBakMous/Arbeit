@@ -1,0 +1,451 @@
+<!-- Defining the scope -->
+
+ <!-- Dropdown menü -->
+Select Asset Manager: <select name ="Select_AM" id = "sel">"Select_AM"</select>
+
+<div ng-controller="DataLoader"id="spiderweb">
+  <!-- Optional for best performance, it will use the cached data from 1 object -->
+
+  <sofy-cache-object-definition object-uuid="98726C5D-6C43-4FEF-9853-97CB2E135913">
+
+    <!-- Getting the field data, model is the global variable.. Field UUID is the actually UUID of the field you are trying to display -->
+    <!-- <sofy-object-field object="object" field-uuid="FDFBB409-1492-4FA1-9A99-E885A8CF65B0" model="objectData"></sofy-object-field> -->
+
+  </sofy-cache-object-definition>
+
+</div>
+<div ng-controller="DataLoader2">
+
+  <!-- Optional for best performance, it will use the cached data from 1 object -->
+
+  <sofy-cache-object-definition object-uuid="98726C5D-6C43-4FEF-9853-97CB2E135913">
+
+    <!-- Getting the field data, model is the global variable.. Field UUID is the actually UUID of the field you are trying to display -->
+    <!-- <sofy-object-field object="object" field-uuid="FDFBB409-1492-4FA1-9A99-E885A8CF65B0" model="objectData"></sofy-object-field> -->
+
+  </sofy-cache-object-definition>
+
+</div>
+
+<script>
+//define global variables
+var AMScore = [];
+var UUID2AM = [];
+var AVERAGE = [];
+//Average and one AM
+var NewBoard1 = [];
+//Default
+var NewBoard0 = [];
+//for ordering the functions
+var bool1 = 0;
+var bool2 = 0;
+
+
+//DataLoader1 --> loading the AM Scores
+            ControllerProvider("DataLoader", function ($rootScope,$location, $scope) {
+              //Provide UUID of the Object
+              var ObjectUUID = '22781FC2-53E3-4AD6-83CF-A3684FFECA13'; // ISC9RiskAssessmentNeu
+
+              //Provide the UUID of the object template - used for authorization purposes
+              var ObjectTemplateUUID = '23284D10-DB47-406D-BAE0-DBB0AD7B65F4'; //ISC9 Test Highcharts
+
+
+            //Just declaring a global variable that I will fill with the object data
+            var asset_manager = [];
+            var scoring_general = [];
+            var scoring_financial = [];
+            var scoring_PuT = [];
+            var scoring_IuC = [];
+            var scoring_IA = [];
+            var scoring_Rc = [];
+            var scoring_ITS = [];
+            var scoring_RA = [];
+
+
+
+
+
+
+              $scope.objectData = {};
+
+              $scope.loadMyData = function(){
+
+                        var getParam = $location.search();
+                        var applicationID = getParam.application;
+
+                        $scope.applicationID = applicationID;
+                        $rootScope.loadObject(ObjectUUID, null, function (err, result) {
+
+                                   //If API returns an error
+                                   if (err)
+                                   {
+                                     console.log(err);
+                                     alert(err);
+                                   }
+                                   else {
+                                     //After success, Objects that meet filter are returned in callback as result
+                                     $scope.objectData = result;
+
+                                    //alert(  JSON.stringify( $scope.objectData ) );
+                                     for(var key in $scope.objectData) {
+                                       var v =  $scope.objectData[key];
+                                       for(var key2 in v)   {
+
+                                         if (key2 == "asset_manager"){
+                                           asset_manager.push(v['asset_manager']);
+                                         }
+                                         if (key2 == "Scoring General"){
+                                           scoring_general.push(v['Scoring General']);
+                                         }
+                                         if (key2 == "Scoring Financial"){
+                                           scoring_financial.push(v['Scoring Financial']);
+                                         }
+                                         if (key2 == "Scoring Portfoliomanagement und Trading"){
+                                           scoring_PuT.push(v['Scoring Portfoliomanagement und Trading']);
+                                         }
+                                         if (key2 == "Scoring IKS und Compliance"){
+                                           scoring_IuC.push(v['Scoring IKS und Compliance']);
+                                         }
+                                         if (key2 == "Scoring Internal Audit"){
+                                           scoring_IA.push(v['Scoring Internal Audit']);
+                                         }
+                                         if (key2 == "Scoring Risikocontrolling"){
+                                           scoring_Rc.push(v['Scoring Risikocontrolling']);
+                                         }
+                                         if (key2 == "Scoring IT Security"){
+                                           scoring_ITS.push(v['Scoring IT Security']);
+                                         }
+                                         if (key2 == "Scoring Regulatorische Anforderungen"){
+                                           scoring_RA.push(v['Scoring Regulatorische Anforderungen']);
+                                         }
+
+                                      }
+
+                                    }
+
+                                    SuperCombi(asset_manager, scoring_general, scoring_financial, scoring_PuT, scoring_IuC, scoring_IA, scoring_Rc, scoring_ITS, scoring_RA);
+
+                                    //Calculate the average
+                                    Calc_AVG(scoring_general, scoring_financial, scoring_PuT, scoring_IuC, scoring_IA, scoring_Rc, scoring_ITS, scoring_RA);
+
+                                    // start generating the Chart only if both data loader are done!
+                                    bool1 = 1;
+
+                                    if(bool1 == 1 && bool2 == 1){
+                                      GenerateFinal();
+                                    }
+                                }
+                          },{
+                            uiUUID: ObjectTemplateUUID,
+                            filter: {
+                              applicationUUID: applicationID
+                             }
+                           });
+              };
+
+              //Just execute function so it loads the data when page is loading (in function because it can then easily be reload)
+
+               $scope.loadMyData();
+        });
+//DataLoader1 --> loading the AM names
+            ControllerProvider("DataLoader2", function ($rootScope,$location, $scope) {
+
+                //Provide UUID of the Object
+                var ObjectUUID2 = 'BF08856F-EBA0-4A26-ABBF-FF8FBCF3FEEF'; //ISC9AssetManager
+
+                //Provide the UUID of the object template - used for authorization purposes
+                var ObjectTemplateUUID2 = '6FD977E6-1770-423F-BB45-95F343A40063'; //Manage Asset Managers
+
+                //Just declaring a global variable that I will fill with the object data
+
+                var UUID_AM = [];
+                var AssetManager = [];
+                var Organization = [];
+                var UUID2AM = [];
+
+
+                  $scope.objectData = {};
+
+                  $scope.loadMyData = function(){
+
+                        var getParam1 = $location.search();
+                        var applicationID1 = getParam1.application;
+
+                        $scope.applicationID1 = applicationID1;
+
+                        $rootScope.loadObject(ObjectUUID2, null, function (err, result) {
+
+                                   //If API returns an error
+                                   if (err)
+                                   {
+                                     console.log(err);
+                                     alert(err);
+                                   }
+                                   else {
+                                         //After success, Objects that meet filter are returned in callback as result
+                                        $scope.objectData = result;
+
+                                      //alert(  JSON.stringify( $scope.objectData ) );
+                                        for(var key in $scope.objectData) {
+
+                                             var v =  $scope.objectData[key];
+                                             for(var key2 in v)   {
+                                               if (key2 =="organization"){
+                                                AssetManager.push(v['organization']);
+                                               }
+                                              if(key2 == "UUID") {
+                                                UUID_AM.push(v['UUID']);
+                                              }
+                                              if(key2 == "organization") {
+                                                Organization.push(v['organization']);
+                                              }
+                                             }
+
+                                        }
+
+                                        //alert( JSON.stringify ( AssetManager ) );
+                                        SuperCombi2(AssetManager, UUID_AM, Organization);
+                                        bool2 = 1;
+                                        if(bool1 == 1 && bool2 == 1){
+                                          GenerateFinal();
+                                        }
+
+
+                                  }
+                          },{
+                                uiUUID: ObjectTemplateUUID2,
+                                filter: {
+                                  applicationUUID: applicationID1
+                                }
+                            }
+                          );
+                    };
+
+                                    //Just execute function so it loads the data when page is loading (in function because it can then easily be reload)
+
+                    $scope.loadMyData();
+            });
+
+//map scores to AM UUID
+      function SuperCombi(asset_manager, scoring_general, scoring_financial, scoring_PuT, scoring_IuC, scoring_IA, scoring_Rc, scoring_ITS, scoring_RA){
+
+              for (var x = 0; x < asset_manager.length; x++){
+
+                var Score = [scoring_general[x] , scoring_financial[x], scoring_PuT[x], scoring_IuC[x], scoring_IA[x], scoring_Rc[x], scoring_ITS[x], scoring_RA[x]];
+
+                  var AM = { "name": asset_manager[x]  , "data": Score };
+
+                  AMScore.push( AM );
+                }
+
+        //alert(  JSON.stringify( AMScore )  );
+          //GenerateChart();
+      };
+//map UUID to AM name
+      function SuperCombi2( AssetManager, UUID_AM, Organization ){
+
+        for (var y = 0; y < Organization.length; y++){
+
+          var ID_to_AM = { "uuid": UUID_AM[y], "name": AssetManager[y]};
+
+          UUID2AM.push( ID_to_AM );
+
+        }
+
+        //alert ( JSON.stringify ( UUID2AM ) );
+
+      };
+
+//final function to map uuid to asset manager name
+      function GenerateFinal(){
+              //alert (  UUID2AM.length );
+              //alert(  JSON.stringify( AMScore )  );
+
+              for (var a = 0; a < AMScore.length; a++){
+
+                for (var b = 0; b < UUID2AM.length; b++ ){
+
+                  if(AMScore[a]["name"] == UUID2AM[b]["uuid"]){
+                    AMScore[a]["name"] = UUID2AM[b]["name"];
+
+                  }
+
+                }
+
+
+              }
+
+              NewBoard0 = [{"name": AMScore[0]["name"], "data": AMScore[0]["data"]},{"name": AVERAGE[0]["name"], "data": AVERAGE[0]["data"], "color": AVERAGE[0]["color"]}];
+              //alert ( JSON.stringify(AMScore) );
+              GenerateChart();
+
+              // set all the AMScore names as the dropdown options
+              $.each(AMScore, function(i, option) {
+                  $('#sel').append($('<option/>').attr("value", option.id).text(option.name));
+                });
+            dropdown();
+
+     };
+
+//Calculate the average for every category
+      function Calc_AVG(scoring_general, scoring_financial, scoring_PuT, scoring_IuC, scoring_IA, scoring_Rc, scoring_ITS, scoring_RA){
+        //average per category, rount for 2 decimals
+        let sum_sg = scoring_general.reduce((previous, current) => current += previous);
+        let avg_sg = sum_sg / scoring_general.length;
+      //  let round_sg = avg_sg.toFixed(2);
+        //alert(round_sg);
+
+        let sum_sf = scoring_financial.reduce((previous, current) => current += previous);
+        let avg_sf = sum_sf / scoring_financial.length;
+        //let round_sf = avg_sf.toFixed(2);
+
+        let sum_PuT = scoring_PuT.reduce((previous, current) => current += previous);
+        let avg_PuT = sum_PuT / scoring_PuT.length;
+        //let round_PuT = avg_PuT.toFixed(2);
+
+
+        let sum_IuC = scoring_IuC.reduce((previous, current) => current += previous);
+        let avg_IuC = sum_IuC / scoring_IuC.length;
+        //let round_IuC = avg_IuC.toFixed(2);
+
+
+        let sum_IA = scoring_IA.reduce((previous, current) => current += previous);
+        let avg_IA = sum_IA / scoring_IA.length;
+        //let round_IA = avg_IA.toFixed(2);
+
+
+        let sum_Rc = scoring_Rc.reduce((previous, current) => current += previous);
+        let avg_Rc = sum_Rc / scoring_Rc.length;
+        //let round_Rc = avg_Rc.toFixed(2);
+
+
+        let sum_ITS = scoring_ITS.reduce((previous, current) => current += previous);
+        let avg_ITS = sum_ITS / scoring_ITS.length;
+        //let round_ITS = avg_ITS.toFixed(2);
+
+
+        let sum_RA = scoring_RA.reduce((previous, current) => current += previous);
+        let avg_RA = sum_RA / scoring_RA.length;
+        //let round_RA = avg_RA.toFixed(2);
+
+        //alert("sg=" + round_sg + "sf=" +round_sf +"PuT=" + round_PuT +"IuC=" + round_IuC +"IA=" + round_IA +"Rc=" + round_Rc +"ITS=" + round_ITS +"RA=" + round_RA );
+        var AVG1 = [avg_sg, avg_sf, avg_PuT, avg_IuC, avg_IA, avg_Rc, avg_ITS, avg_RA];
+        var name11 = "Average";
+        var color_avg = '#87868C';
+        var VORAVERAGE = {"name": name11, "data": AVG1, "color": color_avg };
+
+        AVERAGE.push( VORAVERAGE );
+
+        //alert( JSON.stringify(AVERAGE) );
+      }
+//action behind the dropdown selection
+      function dropdown(){
+     //get selection from dropdown
+     var select = document.getElementById('sel');
+
+     //show the values of the selected AM
+     select.addEventListener('change', (e) => {
+       var AM_Sel = e.target.value;
+       var NewData = [];
+       var Roland1 = [];
+       var Roland2 = [];
+       var Roland3 = [];
+       var color_am = '#2717C6';
+       //alert (AM_Sel);
+    for (var j = 0; j < AMScore.length; j++){
+
+
+      if (AMScore[j]["name"] == AM_Sel){
+        //alert(AMScore[j]["name"] + ' ' + AMScore[j]["data"]);
+         Roland1 = AMScore[j]["name"];
+         Roland2 = AMScore[j]["data"];
+        //alert ( Roland1 + Roland2 );
+        Roland3 = {"name": Roland1, "data": Roland2, "color": color_am} ;
+
+      }
+
+    }
+      NewData.push( Roland3 );
+
+      //var NewBoard = [];
+      NewBoard1 = [{"name": NewData[0]["name"], "data": NewData[0]["data"]},{"name": AVERAGE[0]["name"], "data": AVERAGE[0]["data"]}];
+      //NewBoard.push(NewBoard1);
+      //alert( JSON.stringify(NewBoard1));
+
+
+      //alert ( JSON.stringify(AVERAGE[0]["data"]) );
+      var Chart1 = $('#spiderweb').highcharts();
+      Chart1.update({
+      series: NewBoard1,
+    },false, false);
+
+      Chart1.redraw();
+
+     });
+   }
+//Highchart Spiderweb Chart
+      function GenerateChart(){Highcharts.chart("spiderweb", {
+
+          chart: {
+              polar: true,
+              type: 'line'
+          },
+
+          title: {
+              text: 'Risk Assessments',
+              x: -80
+          },
+
+          pane: {
+              size: '80%'
+          },
+
+          xAxis: {
+              categories: ['Allgemeines und Organisation', 'Finanzen', 'Portfoliomanagement und Trading', 'IKS und Compliance',
+            'Internal Audit', 'Risikocontrolling', 'IT Security', 'Regulatorische Anforderungen'],
+              tickmarkPlacement: 'on',
+              lineWidth: 0
+          },
+
+          yAxis: {
+              gridLineInterpolation: 'polygon',
+              lineWidth: 0,
+              min: 0
+          },
+
+          tooltip: {
+
+              shared: true,
+              pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.2f}</b><br/>'
+          },
+
+          legend: {
+              align: 'center',
+              verticalAlign: 'bottom'
+          },
+
+          series:  NewBoard0,
+          responsive: {
+              rules: [{
+                  condition: {
+                      maxWidth: 500
+                  },
+                  chartOptions: {
+                      legend: {
+                          align: 'right',
+                          verticalAlign: 'bottom'
+                      },
+                      pane: {
+                          size: '70%'
+                      }
+                  }
+              }]
+          }
+
+      });
+  }
+
+
+
+
+</script>

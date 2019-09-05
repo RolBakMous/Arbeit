@@ -1,0 +1,144 @@
+<div class="topnavnew">
+
+    <a class="active" href="" id="edit-button" title="Edit" ng-if=" '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+        <i class="fa fa-edit" id="icon-design"></i>
+    </a>
+
+    <span class="inactive" title="Edit" ng-if=" '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' ">
+      <i class="fas fa-edit" id= "icon-design"></i>
+  </span>
+
+  <span class="active" href="" id="save-button2" title="Save">
+  <i class="fas fa-save" ></i>
+</span>
+
+    <span class="active" title="Progress" id="progress-change" ng-if=" '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+      <i class="fas fa-bullseye" ></i>
+  </span>
+
+    <span class="inactive" title="Progress" id="disabled-progress-change" ng-if=" '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' ">
+      <i class="fas fa-bullseye" ></i>
+  </span>
+
+    <span class="active" href="" id="save-button" title="Save">
+    <i class="fas fa-save" ></i>
+  </span>
+
+    <span class="active" title="Discussion" ng-if=" '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+    <i class="fas fa-comment" ></i>
+  </span>
+
+    <span class="inactive" title="Discussion" ng-if=" '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' ">
+    <i class="fas fa-comment" ></i>
+  </span>
+
+    <span class="active" id="idea-button" title="Idea" ng-if=" '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' ">
+
+   <i class="fas fa-lightbulb" ></i>
+  </span>
+
+    <span class="inactive" id="disabled-idea-button" title="Idea" ng-if=" '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == ''">
+
+   <i class="fas fa-lightbulb" ></i>
+
+  </span>
+
+    <span class="active" id="stakeholders-button" title="Stakeholder selection" ng-if=" '[[@businessRuleR2 - role]]' == 'Strategy Owner' || '[[@businessRuleR2 - role]]' == 'Team Member' || '[[@businessRuleR2 - role]]' == 'Admin' " ng-controller="WizModal" ng-click="onButtonClick('[[strategy_uuid]]')">
+
+    <i class="fas fa-users-cog" ></i>
+    <div id="form-wizard-modal"></div>
+  </span>
+
+    <span class="inactive" id="disabled_stakeholders_button" title="Stakeholder selection" ng-if=" '[[@businessRuleR2 - role]]' == 'Viewer' || '[[@businessRuleR2 - role]]' == 'Business Partner' || '[[@businessRuleR2 - role]]' == '' ">
+
+    <i class="fas fa-users-cog" ></i>
+
+  </span>
+    <a class="active" id="icon-design" style="float:right;" href="/#/PRD9/CM/StrategyAnalysis/[[StrategyUUID]]/Analyze/analyzePhase" title="Back to cockpit">
+        <i class="fas fa-angle-double-left" id="icon-design"></i>
+    </a>
+    <span class="active" style="background-color:#00338D!important; float:right">Progress: [[ProgressStatus]]%
+  </span>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $("#R3").hide();
+        $("#R888").hide();
+        $("#save-button").hide();
+        $("#progress-change").show();
+        $( '#D_22C_3 .col-12 #submitSecondary').click(); // Default field state - Disabled
+
+        $(".topnavnew").on("click", "#progress-change", function() {
+            $("#R3").fadeIn(800);
+            $("#save-button").show();
+            $("#progress-change").hide();
+        });
+
+        $("#save-button" ).click(function() {
+            $("#R3").fadeOut(800);
+            $("#save-button").hide();
+            $("#progress-change").show();
+            $('#C100 .col-12 #submitSecondary').click();
+        });
+
+        $(".topnavnew").on("click", "#idea-button", function() {
+
+            if ($("#R888").is(":visible") == false) {
+
+                var styles = {
+                    display: "block",
+                    position: 'absolute',
+                    top: '100px',
+                    right: '-1900px',
+                    height: '80vh',
+                    overflow: 'auto',
+                    'z-index': '22',
+                    'box-shadow': 'none'
+                };
+
+                $("#R888").css(styles);
+                $("#R888").animate({
+                    "right": "-0px"
+                }, "slow");
+                $("#idea-button" ).attr("disabled", false);
+
+                $("#idea-button").html('<i class="far fa-times-circle" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>');
+
+            } else {
+
+                $("#R888").animate({
+                    "right": "-1900px"
+                }, "slow");
+                $("#R888").fadeOut(800);
+                $("#idea-button" ).attr("disabled", false);
+
+                $("#idea-button" ).html('<i class="fas fa-lightbulb" style="font-size: 12pt; color: white; margin-left:4px; width: 1.2rem;"></i>');
+            }
+        });
+    });
+
+    $( ".active").on("click", "#edit-button", function(){
+      $( "#edit-button" ).hide();
+      $( "#save-button2" ).show();
+      $( '#D_22C_3 .col-12 #submitSecondary').click();
+    });
+
+    $( ".active").on("click", "#save-button2", function(){
+      $( "#save-button2" ).hide();
+      $( "#edit-button" ).show();
+      $( '#C100 .col-12 #submitSecondary').click();
+      $( '#D_22C_3 .col-12 #submitSecondary').click();
+    });
+
+    var controllerName = "WizModal";
+    ControllerProvider(controllerName, function($scope, $compile) {
+        $scope.onButtonClick = function(rUUID) {
+
+            $scope.recordUUID = rUUID;
+            $scope.wizardUUID = '5D4BDC56-DAB2-4085-BCBD-BAB3BD478EC1';
+
+            $('#form-wizard-modal').append($compile('<form-wizard-modal wizard-uuid= "' + $scope.wizardUUID + '" record-uuid = "' + $scope.recordUUID + '" mode="edit"></form-wizard-modal>')($scope))
+        }
+    });
+</script>
